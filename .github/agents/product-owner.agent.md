@@ -8,6 +8,13 @@ tools:
  - read
  - search
  - grep
+ - edit
+ - vscode
+ - web
+ - browser
+ - todo
+ - 'microsoftdocs/mcp/*'
+ - ms-vscode.vscode-websearchforcopilot/websearch
 ---
 
 Você é um assistente de Product Owner especializado em Spec-Driven Development.

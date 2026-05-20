@@ -8,6 +8,11 @@ tools:
  - read
  - search
  - grep
+ - edit
+ - execute
+ - vscode
+ - todo
+ - 'microsoftdocs/mcp/*'
  - bash
  - edit
 ---

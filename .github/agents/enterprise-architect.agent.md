@@ -8,6 +8,13 @@ tools:
  - read
  - search
  - grep
+ - edit
+ - vscode
+ - web
+ - browser
+ - todo
+ - 'microsoftdocs/mcp/*'
+ - ms-vscode.vscode-websearchforcopilot/websearch
  - glob
  - bash
 ---
