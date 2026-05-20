@@ -1,0 +1,96 @@
+name: Lint Markdown and Spec Quality
+
+on:
+  push:
+    branches: [main, develop, "spec/**"]
+  pull_request:
+    paths:
+      - "**.md"
+      - "specs/**"
+      - "docs/**"
+
+permissions:
+  contents: read
+
+jobs:
+  markdown-lint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: |
+            **/*.md
+            !node_modules
+            !backend/target
+            !frontend/.next
+
+  spec-traceability:
+    name: REQ-ID traceability check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find REQ-IDs without tests
+        run: |
+          set -e
+          if [ -d "specs" ]; then
+            echo "Checking REQ-ID traceability across specs/ and source/test files..."
+            grep -rE "REQ-[A-Z]+-[0-9]+" specs/ -h | grep -oE "REQ-[A-Z]+-[0-9]+" | sort -u > /tmp/reqs-spec.txt || true
+            grep -rE "@implements REQ-[A-Z]+-[0-9]+|REQ-[A-Z]+-[0-9]+" backend/src frontend 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+" | sort -u > /tmp/reqs-code.txt || true
+            comm -23 /tmp/reqs-spec.txt /tmp/reqs-code.txt > /tmp/missing.txt || true
+            if [ -s /tmp/missing.txt ]; then
+              echo "::warning::REQ-IDs declared in specs/ but not referenced in code:"
+              cat /tmp/missing.txt
+            else
+              echo "All REQ-IDs are traced."
+            fi
+          else
+            echo "No specs/ directory yet. Skipping traceability check."
+          fi
+
+  legacy-traceability:
+    name: Legacy traceability gate (every REQ-ID must cite a .NSN/.ddm or [GREENFIELD])
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source_legacy on every requirement
+        run: |
+          set -e
+          if [ ! -d "specs" ]; then
+            echo "No specs/ directory yet. Skipping legacy-traceability gate."
+            exit 0
+          fi
+          echo "Scanning specs/ for REQ-IDs missing 'source_legacy'..."
+          # Find every spec file that declares REQ-IDs
+          spec_files=$(grep -rlE "REQ-[A-Z]+-[0-9]+" specs/ || true)
+          if [ -z "$spec_files" ]; then
+            echo "No REQ-IDs found in specs/ yet."
+            exit 0
+          fi
+          fail=0
+          for f in $spec_files; do
+            # For each REQ-ID block, check that 'source_legacy' appears within the next 20 lines
+            awk '
+              /REQ-[A-Z]+-[0-9]+/ {
+                req=$0; line=NR; found=0;
+                for (i=1; i<=20 && (getline nxt)>0; i++) {
+                  if (nxt ~ /source_01-arqueologia/legado-sifap/) { found=1; break }
+                  if (nxt ~ /^REQ-[A-Z]+-[0-9]+/) break
+                }
+                if (!found) print FILENAME ":" line ": " req
+              }
+            ' "$f" >> /tmp/missing-legacy.txt || true
+          done
+          if [ -s /tmp/missing-legacy.txt ]; then
+            echo "::error::The following REQ-IDs are missing a 'source_legacy:' line within 20 lines of their declaration:"
+            cat /tmp/missing-legacy.txt
+            echo ""
+            echo "Fix: add either"
+            echo "  source_legacy: 01-arqueologia/legado-sifap/natural-programs/<FILE>.NSN#L<start>-L<end>"
+            echo "or"
+            echo '  source_legacy: "[GREENFIELD] <one-line justification>"'
+            exit 1
+          fi
+          echo "All REQ-IDs declare source_legacy. Gate passes."

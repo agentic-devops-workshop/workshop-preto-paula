@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 Team Flow Reference
+    url: https://github.com/paulasilvatech/workshop-datacorp/blob/main/06-kit-repositorio-times/00-TEAM-FLOW.md
+    about: How 5 people cover 10 personas — read before opening any issue.
+  - name: 🤝 Need a facilitator
+    url: https://github.com/paulasilvatech/workshop-datacorp/blob/main/07-playbook-facilitacao/FACILITATOR-FAQ.md
+    about: Stuck for 20 minutes? Raise your hand for the blue-cord team.

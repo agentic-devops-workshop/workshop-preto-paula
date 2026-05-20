@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" font-family="Inter, system-ui, sans-serif">
+  <rect width="1200" height="240" fill="#F7F7F5"/>
+
+  <text x="60" y="40" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="1.9">DIA 2 · INSTALAR SEU PERSONA KIT</text>
+  <text x="60" y="76" fill="#1A1A1A" font-size="28" font-weight="500" letter-spacing="-0.4">5 passos · ~10 minutos</text>
+
+  <!-- 5 steps along horizontal axis -->
+  <!-- box 200 wide, gap 24, 5*200 + 4*24 = 1096, start x=52 -->
+
+  <g transform="translate(52, 130)">
+    <rect width="200" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="200" height="4" fill="#F25022"/>
+    <text x="16" y="34" fill="#B33816" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 01</text>
+    <text x="16" y="62" fill="#1A1A1A" font-size="16" font-weight="500">Leia</text>
+    <text x="16" y="80" fill="#737373" font-size="13">PERSONA.md do kit</text>
+  </g>
+
+  <g transform="translate(276, 130)">
+    <rect width="200" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="200" height="4" fill="#FFB900"/>
+    <text x="16" y="34" fill="#B88500" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 02</text>
+    <text x="16" y="62" fill="#1A1A1A" font-size="16" font-weight="500">Revise</text>
+    <text x="16" y="80" fill="#737373" font-size="13">o README do kit</text>
+  </g>
+
+  <g transform="translate(500, 130)">
+    <rect width="200" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="200" height="4" fill="#7FBA00"/>
+    <text x="16" y="34" fill="#5A8500" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 03</text>
+    <text x="16" y="62" fill="#1A1A1A" font-size="16" font-weight="500">Copie</text>
+    <text x="16" y="80" fill="#737373" font-size="13">.github/* do mesmo kit</text>
+  </g>
+
+  <g transform="translate(724, 130)">
+    <rect width="200" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="200" height="4" fill="#00A4EF"/>
+    <text x="16" y="34" fill="#0076AC" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 04</text>
+    <text x="16" y="62" fill="#1A1A1A" font-size="16" font-weight="500">Copie</text>
+    <text x="16" y="80" fill="#737373" font-size="13">mcp.json se existir</text>
+  </g>
+
+  <g transform="translate(948, 130)">
+    <rect width="200" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="200" height="4" fill="#1A1A1A"/>
+    <text x="16" y="34" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 05</text>
+    <text x="16" y="62" fill="#1A1A1A" font-size="16" font-weight="500">Recarregue</text>
+    <text x="16" y="80" fill="#737373" font-size="13">o Copilot Chat</text>
+  </g>
+
+  <!-- Arrows -->
+  <g fill="none" stroke="#737373" stroke-width="1.5">
+    <line x1="252" y1="180" x2="276" y2="180" marker-end="url(#a)"/>
+    <line x1="476" y1="180" x2="500" y2="180" marker-end="url(#a)"/>
+    <line x1="700" y1="180" x2="724" y2="180" marker-end="url(#a)"/>
+    <line x1="924" y1="180" x2="948" y2="180" marker-end="url(#a)"/>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#737373"/>
+    </marker>
+  </defs>
+</svg>

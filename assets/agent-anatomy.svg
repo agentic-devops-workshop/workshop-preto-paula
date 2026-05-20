@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" font-family="Inter, system-ui, sans-serif">
+  <rect width="1200" height="500" fill="#F7F7F5"/>
+
+  <text x="60" y="40" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="1.9">DIA 2 · ANATOMIA DE UM AGENTE</text>
+  <text x="60" y="76" fill="#1A1A1A" font-size="28" font-weight="500" letter-spacing="-0.4">5 camadas que compõem um agente Copilot</text>
+
+  <!-- Top: Central Agente card -->
+  <g transform="translate(450, 120)">
+    <rect width="300" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="300" height="6" fill="#F25022"/>
+    <text x="20" y="36" fill="#B33816" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">CAMADA RAIZ · OBRIGATÓRIA</text>
+    <text x="20" y="66" fill="#1A1A1A" font-size="20" font-weight="500">Agente</text>
+    <text x="20" y="88" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">.github/agents/*.agent.md</text>
+  </g>
+
+  <!-- Arrows from agente to 4 children -->
+  <g fill="none" stroke="#737373" stroke-width="1.5">
+    <line x1="540" y1="220" x2="180" y2="290" marker-end="url(#arr)"/>
+    <line x1="560" y1="220" x2="450" y2="290" marker-end="url(#arr)"/>
+    <line x1="640" y1="220" x2="750" y2="290" marker-end="url(#arr)"/>
+    <line x1="660" y1="220" x2="1020" y2="290" marker-end="url(#arr)"/>
+  </g>
+
+  <!-- Bottom: 4 children layers, each with description -->
+  <!-- 4 boxes: 220 wide, gap 30, total 4*220 + 3*30 = 970, start x = 115 -->
+
+  <g transform="translate(60, 290)">
+    <rect width="220" height="170" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="4" fill="#00A4EF"/>
+    <text x="16" y="32" fill="#0076AC" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">CAMADA 02</text>
+    <text x="16" y="60" fill="#1A1A1A" font-size="18" font-weight="500">Instruções</text>
+    <text x="16" y="82" fill="#737373" font-family="JetBrains Mono, monospace" font-size="10">.instructions.md</text>
+    <text x="16" y="112" fill="#737373" font-size="12">Regras por tipo</text>
+    <text x="16" y="130" fill="#737373" font-size="12">de arquivo:</text>
+    <text x="16" y="148" fill="#737373" font-size="12">Natural, Java,</text>
+    <text x="16" y="160" fill="#737373" font-size="12">frontend.</text>
+  </g>
+
+  <g transform="translate(310, 290)">
+    <rect width="220" height="170" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="4" fill="#7FBA00"/>
+    <text x="16" y="32" fill="#5A8500" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">CAMADA 03</text>
+    <text x="16" y="60" fill="#1A1A1A" font-size="18" font-weight="500">Prompts</text>
+    <text x="16" y="82" fill="#737373" font-family="JetBrains Mono, monospace" font-size="10">.prompt.md</text>
+    <text x="16" y="112" fill="#737373" font-size="12">Comandos slash</text>
+    <text x="16" y="130" fill="#737373" font-size="12">para tarefas</text>
+    <text x="16" y="148" fill="#737373" font-size="12">recorrentes:</text>
+    <text x="16" y="160" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">/ears-convert</text>
+  </g>
+
+  <g transform="translate(610, 290)">
+    <rect width="220" height="170" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="4" fill="#FFB900"/>
+    <text x="16" y="32" fill="#B88500" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">CAMADA 04</text>
+    <text x="16" y="60" fill="#1A1A1A" font-size="18" font-weight="500">Skills</text>
+    <text x="16" y="82" fill="#737373" font-family="JetBrains Mono, monospace" font-size="10">skills/*/SKILL.md</text>
+    <text x="16" y="112" fill="#737373" font-size="12">Workflows</text>
+    <text x="16" y="130" fill="#737373" font-size="12">didáticos com</text>
+    <text x="16" y="148" fill="#737373" font-size="12">exemplos:</text>
+    <text x="16" y="160" fill="#737373" font-size="12">TDD, ADR, etc.</text>
+  </g>
+
+  <g transform="translate(910, 290)">
+    <rect width="220" height="170" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="4" fill="#1A1A1A"/>
+    <text x="16" y="32" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">CAMADA 05 · OPCIONAL</text>
+    <text x="16" y="60" fill="#1A1A1A" font-size="18" font-weight="500">MCP</text>
+    <text x="16" y="82" fill="#737373" font-family="JetBrains Mono, monospace" font-size="10">mcp.json</text>
+    <text x="16" y="112" fill="#737373" font-size="12">Conecta a</text>
+    <text x="16" y="130" fill="#737373" font-size="12">sistemas externos:</text>
+    <text x="16" y="148" fill="#737373" font-size="12">GitHub, banco,</text>
+    <text x="16" y="160" fill="#737373" font-size="12">Azure.</text>
+  </g>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#737373"/>
+    </marker>
+  </defs>
+</svg>

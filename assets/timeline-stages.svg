@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" font-family="Inter, system-ui, sans-serif">
+  <rect width="1200" height="200" fill="#F7F7F5"/>
+
+  <text x="60" y="40" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="1.9">DIA 2 · LINHA DO TEMPO</text>
+
+  <!-- Timeline rail -->
+  <line x1="92" y1="115" x2="1108" y2="115" stroke="#D9D9D4" stroke-width="2"/>
+
+  <!-- 6 stops: PRE, S1, S2, S3, S4, DEMO -->
+  <!-- positions evenly distributed: x = 100, 300, 500, 700, 900, 1100 -->
+
+  <!-- PRE -->
+  <g transform="translate(100, 115)">
+    <circle cx="0" cy="0" r="10" fill="#FFFFFF" stroke="#737373" stroke-width="2"/>
+    <text x="0" y="-26" fill="#737373" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2" text-anchor="middle">PRÉ-EVENTO</text>
+    <text x="0" y="38" fill="#737373" font-size="11" text-anchor="middle">09:00 – 12:00</text>
+    <text x="0" y="54" fill="#737373" font-size="11" text-anchor="middle">setup</text>
+  </g>
+
+  <!-- S1 -->
+  <g transform="translate(300, 115)">
+    <circle cx="0" cy="0" r="14" fill="#F25022" stroke="#B33816" stroke-width="2"/>
+    <text x="0" y="4" fill="#FFFFFF" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="0.5" text-anchor="middle">01</text>
+    <text x="0" y="-30" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2" text-anchor="middle">ESTÁGIO 01</text>
+    <text x="0" y="40" fill="#1A1A1A" font-size="13" font-weight="500" text-anchor="middle">Arqueologia</text>
+    <text x="0" y="58" fill="#737373" font-size="11" text-anchor="middle">11:00 – 14:00</text>
+  </g>
+
+  <!-- S2 -->
+  <g transform="translate(500, 115)">
+    <circle cx="0" cy="0" r="14" fill="#00A4EF" stroke="#0076AC" stroke-width="2"/>
+    <text x="0" y="4" fill="#FFFFFF" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="0.5" text-anchor="middle">02</text>
+    <text x="0" y="-30" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2" text-anchor="middle">ESTÁGIO 02</text>
+    <text x="0" y="40" fill="#1A1A1A" font-size="13" font-weight="500" text-anchor="middle">Spec Moderna</text>
+    <text x="0" y="58" fill="#737373" font-size="11" text-anchor="middle">14:00 – 15:00</text>
+  </g>
+
+  <!-- S3 -->
+  <g transform="translate(700, 115)">
+    <circle cx="0" cy="0" r="14" fill="#7FBA00" stroke="#5A8500" stroke-width="2"/>
+    <text x="0" y="4" fill="#FFFFFF" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="0.5" text-anchor="middle">03</text>
+    <text x="0" y="-30" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2" text-anchor="middle">ESTÁGIO 03</text>
+    <text x="0" y="40" fill="#1A1A1A" font-size="13" font-weight="500" text-anchor="middle">Implementação</text>
+    <text x="0" y="58" fill="#737373" font-size="11" text-anchor="middle">15:00 – 16:10</text>
+  </g>
+
+  <!-- S4 -->
+  <g transform="translate(900, 115)">
+    <circle cx="0" cy="0" r="14" fill="#FFB900" stroke="#B88500" stroke-width="2"/>
+    <text x="0" y="4" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="0.5" text-anchor="middle">04</text>
+    <text x="0" y="-30" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2" text-anchor="middle">ESTÁGIO 04</text>
+    <text x="0" y="40" fill="#1A1A1A" font-size="13" font-weight="500" text-anchor="middle">Evolução</text>
+    <text x="0" y="58" fill="#737373" font-size="11" text-anchor="middle">16:10 – 16:50</text>
+  </g>
+
+  <!-- DEMO -->
+  <g transform="translate(1100, 115)">
+    <circle cx="0" cy="0" r="10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+    <text x="0" y="-26" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2" text-anchor="middle">DEMO + RETRO</text>
+    <text x="0" y="38" fill="#737373" font-size="11" text-anchor="middle">17:00 – 18:00</text>
+    <text x="0" y="54" fill="#737373" font-size="11" text-anchor="middle">apresentação</text>
+  </g>
+
+  <!-- Handoff labels along the rail -->
+  <g font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="0.5" text-anchor="middle">
+    <text x="400" y="100" fill="#737373">H1</text>
+    <text x="600" y="100" fill="#737373">H2</text>
+    <text x="800" y="100" fill="#737373">H3</text>
+  </g>
+</svg>

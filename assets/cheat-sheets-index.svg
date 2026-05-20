@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" font-family="Inter, system-ui, sans-serif">
+  <rect width="1200" height="380" fill="#F7F7F5"/>
+
+  <text x="60" y="40" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="1.9">DIA 2 · CARTÕES DE REFERÊNCIA RÁPIDA</text>
+  <text x="60" y="76" fill="#1A1A1A" font-size="28" font-weight="500" letter-spacing="-0.4">3 cartões de 1 página — abra quando bater dúvida</text>
+
+  <!-- 3 cards: 340 wide, gap 30, total 3*340 + 2*30 = 1080, start x=60 -->
+
+  <g transform="translate(60, 140)">
+    <rect width="340" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="340" height="6" fill="#F25022"/>
+    <text x="22" y="38" fill="#B33816" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">CARTÃO 01 · COPILOT</text>
+    <text x="22" y="78" fill="#1A1A1A" font-size="22" font-weight="500">Copilot em 3 modos</text>
+    <text x="22" y="120" fill="#737373" font-family="JetBrains Mono, monospace" font-size="13" font-style="italic">PERGUNTA-GUIA</text>
+    <text x="22" y="142" fill="#1A1A1A" font-size="15">"É Ask, Plan ou Agent?"</text>
+    <text x="22" y="180" fill="#737373" font-size="13">Tabela situação → modo,</text>
+    <text x="22" y="198" fill="#737373" font-size="13">exemplos, anti-padrões.</text>
+  </g>
+
+  <g transform="translate(430, 140)">
+    <rect width="340" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="340" height="6" fill="#00A4EF"/>
+    <text x="22" y="38" fill="#0076AC" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">CARTÃO 02 · SPEC-KIT</text>
+    <text x="22" y="78" fill="#1A1A1A" font-size="22" font-weight="500">Spec-Kit em 1 página</text>
+    <text x="22" y="120" fill="#737373" font-family="JetBrains Mono, monospace" font-size="13" font-style="italic">PERGUNTA-GUIA</text>
+    <text x="22" y="142" fill="#1A1A1A" font-size="15">"Qual /speckit.* uso agora?"</text>
+    <text x="22" y="180" fill="#737373" font-size="13">specify → clarify →</text>
+    <text x="22" y="198" fill="#737373" font-size="13">plan → tasks → analyze.</text>
+  </g>
+
+  <g transform="translate(800, 140)">
+    <rect width="340" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="340" height="6" fill="#7FBA00"/>
+    <text x="22" y="38" fill="#5A8500" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">CARTÃO 03 · ROTEAMENTO</text>
+    <text x="22" y="78" fill="#1A1A1A" font-size="22" font-weight="500">Qual modelo Claude?</text>
+    <text x="22" y="120" fill="#737373" font-family="JetBrains Mono, monospace" font-size="13" font-style="italic">PERGUNTA-GUIA</text>
+    <text x="22" y="142" fill="#1A1A1A" font-size="15">"Haiku, Sonnet ou Opus?"</text>
+    <text x="22" y="180" fill="#737373" font-size="13">Matriz latência ×</text>
+    <text x="22" y="198" fill="#737373" font-size="13">precisão × custo.</text>
+  </g>
+</svg>

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" font-family="Inter, system-ui, sans-serif">
+  <rect width="1200" height="280" fill="#F7F7F5"/>
+
+  <text x="60" y="40" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="1.9">DIA 2 · CADEIA DE RASTREABILIDADE</text>
+  <text x="60" y="76" fill="#1A1A1A" font-size="28" font-weight="500" letter-spacing="-0.4">Do legado ao PR — sem perder o fio</text>
+
+  <!-- 6 steps along a horizontal line -->
+  <!-- Box width 170, gap 18, total 6*170 + 5*18 = 1110, start x = 45 -->
+
+  <g transform="translate(45, 140)">
+    <rect width="170" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="170" height="4" fill="#737373"/>
+    <text x="14" y="34" fill="#737373" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 01 · ORIGEM</text>
+    <text x="14" y="60" fill="#1A1A1A" font-size="18" font-weight="500">Legado</text>
+    <text x="14" y="82" fill="#737373" font-size="12">.NSN · .ddm</text>
+  </g>
+
+  <g transform="translate(233, 140)">
+    <rect width="170" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="170" height="4" fill="#F25022"/>
+    <text x="14" y="34" fill="#B33816" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 02 · ESTÁGIO 1</text>
+    <text x="14" y="60" fill="#1A1A1A" font-size="18" font-weight="500">BR-NNN</text>
+    <text x="14" y="82" fill="#737373" font-size="12">regra catalogada</text>
+  </g>
+
+  <g transform="translate(421, 140)">
+    <rect width="170" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="170" height="4" fill="#00A4EF"/>
+    <text x="14" y="34" fill="#0076AC" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 03 · ESTÁGIO 2</text>
+    <text x="14" y="60" fill="#1A1A1A" font-size="18" font-weight="500">REQ-ID</text>
+    <text x="14" y="82" fill="#737373" font-size="12">EARS + source_legacy</text>
+  </g>
+
+  <g transform="translate(609, 140)">
+    <rect width="170" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="170" height="4" fill="#7FBA00"/>
+    <text x="14" y="34" fill="#5A8500" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 04 · ESTÁGIO 3</text>
+    <text x="14" y="60" fill="#1A1A1A" font-size="18" font-weight="500">Código</text>
+    <text x="14" y="82" fill="#737373" font-size="12">Service + Controller</text>
+  </g>
+
+  <g transform="translate(797, 140)">
+    <rect width="170" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="170" height="4" fill="#7FBA00"/>
+    <text x="14" y="34" fill="#5A8500" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 05 · ESTÁGIO 3</text>
+    <text x="14" y="60" fill="#1A1A1A" font-size="18" font-weight="500">Teste</text>
+    <text x="14" y="82" fill="#737373" font-size="12">Testcontainers</text>
+  </g>
+
+  <g transform="translate(985, 140)">
+    <rect width="170" height="100" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="170" height="4" fill="#1A1A1A"/>
+    <text x="14" y="34" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.2">PASSO 06 · FECHA CICLO</text>
+    <text x="14" y="60" fill="#1A1A1A" font-size="18" font-weight="500">PR no GitHub</text>
+    <text x="14" y="82" fill="#737373" font-size="12">Implements REQ-XXX</text>
+  </g>
+
+  <!-- Arrows -->
+  <g fill="none" stroke="#737373" stroke-width="1.5">
+    <line x1="215" y1="190" x2="233" y2="190" marker-end="url(#a)"/>
+    <line x1="403" y1="190" x2="421" y2="190" marker-end="url(#a)"/>
+    <line x1="591" y1="190" x2="609" y2="190" marker-end="url(#a)"/>
+    <line x1="779" y1="190" x2="797" y2="190" marker-end="url(#a)"/>
+    <line x1="967" y1="190" x2="985" y2="190" marker-end="url(#a)"/>
+  </g>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#737373"/>
+    </marker>
+  </defs>
+</svg>

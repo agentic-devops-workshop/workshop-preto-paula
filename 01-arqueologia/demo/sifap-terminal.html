@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>SIFAP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fonte IBM 3270 — autoencoded em base64 via fontes-cdn nao disponiveis em Google Fonts.
+     Fallback: VT323 (Google Fonts, fonte CRT da DEC, segunda melhor aproximacao) -->
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+  /* IBM 3270 — fonte autentica de terminais IBM rodando SIAFI/SIAPE/sistemas SERPRO.
+     Hospedada em CDN publica (rbanffy/3270font, projeto open source). */
+  @font-face {
+    font-family: 'IBM3270';
+    src: url('https://cdn.jsdelivr.net/gh/rbanffy/3270font@main/build/3270-Regular.woff2') format('woff2');
+    font-display: swap;
+  }
+</style>
+<style>
+  :root {
+    /* Verde fósforo P1 — autêntico de monitores monocromáticos dos anos 80-90.
+       Não é verde-limão moderno. É mais opaco, levemente amarelado. */
+    --p1: #33ee33;
+    --p1-dim: #1a7a1a;
+    --p1-bright: #88ff88;
+    --bg: #060c08;
+    --amber: #ffb000;
+    --red: #ff3030;
+    /* Cores adicionais de terminais IBM 3279 (coloridos) — usadas por sistemas
+       Natural em SERPRO a partir de meados dos anos 90. Não eram universais,
+       mas eram canônicas: branco para títulos, azul para labels não-editáveis,
+       turquoise para campos de destaque. */
+    --white: #f0f0f0;
+    --blue: #6da8ff;
+    --turq: #5fdfdf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'IBM3270', 'VT323', 'Lucida Console', 'Consolas', 'Courier New', monospace;
+  }
+  body {
+    color: var(--p1);
+    position: relative;
+    background: var(--bg);
+  }
+
+  /* Scanlines — finas e sutis, como em fotos reais de CRT a distância normal */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 1.5px,
+      rgba(0,0,0,0.20) 2px,
+      rgba(0,0,0,0) 2.5px
+    );
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  /* Vinheta CRT — escurecimento elíptico forte nas bordas, simula curvatura do tubo
+     e perda de foco característica nas extremidades */
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(
+        ellipse 105% 105% at center,
+        transparent 25%,
+        rgba(0,0,0,0.25) 60%,
+        rgba(0,0,0,0.65) 85%,
+        rgba(0,0,0,0.95) 100%
+      );
+    pointer-events: none;
+    z-index: 51;
+  }
+
+  .terminal {
+    width: 100vw;
+    height: 100vh;
+    /* padding e font-size sao sobrescritos dinamicamente por fitTerminal() */
+    padding: 40px 60px;
+    font-size: 22px;
+    line-height: 1.05;
+    letter-spacing: 1px;
+    color: var(--p1);
+    /* Halo P1 — pequeno, levemente amarelado (P1 antigo amarelava com idade do tubo).
+       Não é "neon glow", é "fósforo persistente". */
+    text-shadow:
+      0 0 1px var(--p1),
+      0 0 3px rgba(51, 238, 51, 0.45),
+      0 0 7px rgba(150, 220, 80, 0.12);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 2;
+    animation: subtle-flicker 7s infinite;
+  }
+
+  /* Flicker bem sutil — como em vídeos de CRT capturados em 60Hz */
+  @keyframes subtle-flicker {
+    0%, 96%, 100% { opacity: 1; }
+    96.5% { opacity: 0.96; }
+    97% { opacity: 1; }
+    98% { opacity: 0.98; }
+    98.5% { opacity: 1; }
+  }
+
+  .terminal::-webkit-scrollbar { width: 6px; }
+  .terminal::-webkit-scrollbar-track { background: transparent; }
+  .terminal::-webkit-scrollbar-thumb { background: var(--p1-dim); }
+
+  pre { font-family: inherit; white-space: pre; }
+
+  .amber {
+    color: var(--amber);
+    text-shadow:
+      0 0 1px var(--amber),
+      0 0 3px rgba(255, 176, 0, 0.5),
+      0 0 7px rgba(255, 176, 0, 0.15);
+  }
+  .red {
+    color: var(--red);
+    text-shadow:
+      0 0 1px var(--red),
+      0 0 3px rgba(255, 48, 48, 0.5),
+      0 0 7px rgba(255, 48, 48, 0.15);
+  }
+  .dim { color: var(--p1-dim); text-shadow: 0 0 2px var(--p1-dim); }
+  .white {
+    color: var(--white);
+    text-shadow: 0 0 2px var(--white), 0 0 5px rgba(240,240,240,0.4);
+  }
+  .blue {
+    color: var(--blue);
+    text-shadow: 0 0 2px var(--blue), 0 0 5px rgba(109,168,255,0.35);
+  }
+  .turq {
+    color: var(--turq);
+    text-shadow: 0 0 2px var(--turq), 0 0 5px rgba(95,223,223,0.35);
+  }
+
+  .input-line { display: flex; align-items: baseline; margin-top: 0; }
+  .prompt-label { margin-right: 0.5ch; }
+  #cmd {
+    background: transparent; border: none; outline: none;
+    color: var(--p1);
+    font-family: inherit;
+    font-size: inherit;
+    text-shadow: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    /* Width ajustado dinamicamente em JS conforme o usuario digita —
+       garante que o cursor block fique grudado no fim do texto, nao no canto direito */
+    width: 0.5ch;
+    flex: 0 0 auto;
+    caret-color: transparent;
+    text-transform: uppercase;
+    padding: 0;
+    margin: 0;
+  }
+  .cursor {
+    display: inline-block;
+    width: 0.55em; height: 1em;
+    background: var(--p1);
+    box-shadow: 0 0 4px var(--p1);
+    animation: blink 1.05s steps(1) infinite;
+    vertical-align: text-bottom;
+    margin-left: 1px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .pfline { color: var(--p1-dim); white-space: pre; font-family: inherit; text-shadow: 0 0 2px var(--p1-dim); }
+</style>
+</head>
+<body>
+<div class="terminal" id="terminal">
+  <pre id="output"></pre>
+  <div class="input-line" id="inputLine" style="display:none;">
+    <span class="prompt-label" id="promptLabel">COMANDO ===&gt;</span>
+    <input id="cmd" autocomplete="off" autofocus />
+    <span class="cursor"></span>
+  </div>
+  <pre id="pfline" class="pfline"></pre>
+</div>
+
+<script>
+const output = document.getElementById('output');
+const inputLine = document.getElementById('inputLine');
+const cmdInput = document.getElementById('cmd');
+const promptLabel = document.getElementById('promptLabel');
+const pfLineEl = document.getElementById('pfline');
+const terminal = document.getElementById('terminal');
+
+const SCREEN_W = 78;
+const RULE = '='.repeat(SCREEN_W);
+
+let state = { screen: 'BOOT', user: null, terminal: 'T0001', nivel: '-----', history: [], histIdx: -1 };
+
+const BENEF = [
+  { nis: '12345678901', nome: 'MARIA DAS GRACAS SILVA',     cpf: '111.222.333-44', nasc: '15/03/1962', uf: 'BA', mun: 'SALVADOR',     prog: 'BPC',         valor: 1412.00, status: 'ATIVO',    inicio: '01/2018' },
+  { nis: '23456789012', nome: 'JOSE CARLOS DE OLIVEIRA',    cpf: '222.333.444-55', nasc: '22/07/1958', uf: 'PE', mun: 'RECIFE',       prog: 'BPC',         valor: 1412.00, status: 'ATIVO',    inicio: '03/2015' },
+  { nis: '34567890123', nome: 'ANA LUCIA FERREIRA SANTOS',  cpf: '333.444.555-66', nasc: '08/11/1985', uf: 'SP', mun: 'GUARULHOS',    prog: 'BOLSA FAM',   valor:  600.00, status: 'ATIVO',    inicio: '06/2021' },
+  { nis: '45678901234', nome: 'FRANCISCO DAS CHAGAS LIMA',  cpf: '444.555.666-77', nasc: '30/09/1972', uf: 'CE', mun: 'FORTALEZA',    prog: 'AUX BRASIL',  valor:  600.00, status: 'SUSPENSO', inicio: '11/2022' },
+  { nis: '56789012345', nome: 'ROSANGELA APARECIDA SOUZA',  cpf: '555.666.777-88', nasc: '12/04/1979', uf: 'MG', mun: 'CONTAGEM',     prog: 'BOLSA FAM',   valor:  750.00, status: 'ATIVO',    inicio: '02/2020' },
+  { nis: '67890123456', nome: 'ANTONIO PEREIRA DA COSTA',   cpf: '666.777.888-99', nasc: '03/01/1955', uf: 'PA', mun: 'BELEM',        prog: 'BPC',         valor: 1412.00, status: 'ATIVO',    inicio: '08/2016' },
+  { nis: '78901234567', nome: 'JOANA DARC RODRIGUES',       cpf: '777.888.999-00', nasc: '25/06/1990', uf: 'RJ', mun: 'NOVA IGUACU',  prog: 'AUX BRASIL',  valor:  600.00, status: 'CESSADO',  inicio: '04/2022' },
+  { nis: '89012345678', nome: 'PEDRO HENRIQUE ALVES',       cpf: '888.999.000-11', nasc: '17/02/1968', uf: 'RS', mun: 'PORTO ALEGRE', prog: 'BPC',         valor: 1412.00, status: 'ATIVO',    inicio: '12/2019' }
+];
+
+const PAGAMENTOS = {
+  '12345678901': [
+    { mes: '04/2026', valor: 1412.00, status: 'PAGO',     banco: '104', ag: '0001', conta: 'POUP-001234-5' },
+    { mes: '03/2026', valor: 1412.00, status: 'PAGO',     banco: '104', ag: '0001', conta: 'POUP-001234-5' },
+    { mes: '02/2026', valor: 1412.00, status: 'PAGO',     banco: '104', ag: '0001', conta: 'POUP-001234-5' }
+  ],
+  '23456789012': [
+    { mes: '04/2026', valor: 1412.00, status: 'AGENDADO', banco: '001', ag: '4521', conta: 'CC-987654-3'   },
+    { mes: '03/2026', valor: 1412.00, status: 'PAGO',     banco: '001', ag: '4521', conta: 'CC-987654-3'   }
+  ],
+  '34567890123': [
+    { mes: '04/2026', valor:  600.00, status: 'PAGO',     banco: '104', ag: '0089', conta: 'POUP-445566-7' },
+    { mes: '03/2026', valor:  600.00, status: 'PAGO',     banco: '104', ag: '0089', conta: 'POUP-445566-7' }
+  ],
+  '45678901234': [
+    { mes: '04/2026', valor:    0.00, status: 'BLOQ',     banco: '104', ag: '1234', conta: 'POUP-778899-0' },
+    { mes: '03/2026', valor:  600.00, status: 'PAGO',     banco: '104', ag: '1234', conta: 'POUP-778899-0' }
+  ]
+};
+
+function pad(s, n) { s = String(s); return s.length >= n ? s.substring(0, n) : s + ' '.repeat(n - s.length); }
+function lpad(s, n) { s = String(s); return s.length >= n ? s.substring(0, n) : ' '.repeat(n - s.length) + s; }
+function center(s, n) {
+  s = String(s);
+  if (s.length >= n) return s.substring(0, n);
+  const left = Math.floor((n - s.length) / 2);
+  const right = n - s.length - left;
+  return ' '.repeat(left) + s + ' '.repeat(right);
+}
+function now() {
+  const d = new Date();
+  return {
+    data: String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear(),
+    hora: String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0')
+  };
+}
+function padBetween(left, mid, right, total) {
+  const slot = total - left.length - right.length;
+  if (slot <= 0) return (left + mid + right).substring(0, total);
+  return left + center(mid, slot) + right;
+}
+
+function header(programa, titulo, subtitulo) {
+  const t = now();
+  // Linha 1: HORA esquerda, TITULO no centro (branco bright), DATA direita
+  const l1 = padBetween(`HORA: ${t.hora}`, titulo, `DATA: ${t.data}`, SCREEN_W);
+  const l2 = padBetween('', subtitulo, '', SCREEN_W);
+  const l3 = padBetween(`PROGRAMA: ${pad(programa, 8)}`, '', `NIVEL: ${pad(state.nivel, 5)}`, SCREEN_W);
+  const l4 = padBetween(`USUARIO : ${pad(state.user || '----------', 10)}`, '', `TERM : ${state.terminal}`, SCREEN_W);
+
+  // Aplica cores: titulo branco bright (high intensity), subtitulo turquoise.
+  // Detecta a posicao do titulo na linha pra envolver em <span>
+  const tituloIdx = l1.indexOf(titulo);
+  const l1Colored = l1.substring(0, tituloIdx) +
+                    `<span class="white">${titulo}</span>` +
+                    l1.substring(tituloIdx + titulo.length);
+  const subIdx = l2.indexOf(subtitulo);
+  const l2Colored = subtitulo
+    ? l2.substring(0, subIdx) + `<span class="turq">${subtitulo}</span>` + l2.substring(subIdx + subtitulo.length)
+    : l2;
+
+  return l1Colored + '\n' + l2Colored + '\n' + l3 + '\n' + l4 + '\n' + RULE;
+}
+
+function clear() { output.innerHTML = ''; pfLineEl.textContent = ''; }
+function print(text) { output.innerHTML += text; terminal.scrollTop = terminal.scrollHeight; }
+function println(text = '') { print(text + '\n'); }
+
+async function typeOut(text, delay = 14) {
+  for (let i = 0; i < text.length; i++) {
+    output.innerHTML += text[i];
+    terminal.scrollTop = terminal.scrollHeight;
+    await sleep(delay);
+  }
+  output.innerHTML += '\n';
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function renderScreen({ programa, titulo, subtitulo, body, msg, pfkeys, prompt }) {
+  clear();
+  println(header(programa, titulo, subtitulo));
+  print(body);
+  println(RULE);
+  if (msg) println(' ' + msg);
+  promptLabel.textContent = prompt || 'COMANDO ===>';
+  inputLine.style.display = 'flex';
+  pfLineEl.textContent = ' ' + (pfkeys || 'PF1=AJUDA  PF3=SAIR  PF12=RETORNA');
+  cmdInput.value = '';
+  if (typeof syncInputWidth === 'function') syncInputWidth();
+  cmdInput.focus();
+}
+
+// ============ TELAS ============
+
+// Boot enxuto e autêntico — em conexão 3270 real, viam-se 3-4 linhas e caía na tela de logon.
+async function bootSequence() {
+  clear();
+  inputLine.style.display = 'none';
+  pfLineEl.textContent = '';
+  println();
+  println();
+  await typeOut('   DATACORP  -  COM-PLETE 7.4', 8);
+  await sleep(150);
+  await typeOut('   NATURAL CONNECTED TO ADABAS DBID=047  -  LIBRARY: SIFAPPRD', 6);
+  await typeOut('   NATURAL VERSION 6.3.13   (C) SOFTWARE AG  1979-2014', 6);
+  await typeOut('   TERMINAL: T0001', 6);
+  await sleep(450);
+  showLogon();
+}
+
+function showLogon() {
+  state.screen = 'LOGON';
+  state.nivel = '-----';
+  const body = `
+       IDENTIFICACAO DE USUARIO E LIBRARY DE TRABALHO
+
+
+           <span class="blue">USUARIO  :</span>  __________
+
+           <span class="blue">SENHA    :</span>  ********
+
+           <span class="blue">LIBRARY  :</span>  SIFAPPRD
+
+
+       <span class="dim">A SESSAO SERA REGISTRADA NO LOG DE ACESSOS DO SISTEMA.</span>
+       <span class="dim">DICA: TECLE F11 NO TECLADO PARA TELA CHEIA DO BROWSER.</span>
+
+
+
+`;
+  renderScreen({
+    programa: 'LOGON001',
+    titulo: 'SIFAP - LOGON DE USUARIO',
+    subtitulo: 'SISTEMA INTEGRADO DE PAGAMENTO',
+    body,
+    msg: 'INFORME O CODIGO DO USUARIO E TECLE ENTER PARA CONFIRMAR.',
+    pfkeys: 'PF1=AJUDA  PF3=SAIR  PF12=ABANDONAR',
+    prompt: 'USUARIO ===>'
+  });
+}
+
+function showMenu() {
+  state.screen = 'MENU';
+  state.nivel = '00001';
+  const body = `
+
+       SIFAP  -  SISTEMA INTEGRADO DE PAGAMENTO DE BENEFICIOS
+
+           1  -  CONSULTAR BENEFICIARIO POR NIS
+           2  -  CONSULTAR HISTORICO DE PAGAMENTOS
+           3  -  LISTAR BENEFICIARIOS POR PROGRAMA
+           4  -  LISTAR PAGAMENTOS DO MES CORRENTE
+           5  -  RELATORIO GERENCIAL CONSOLIDADO
+           6  -  MANUTENCAO DE BENEFICIO          <span class="dim">[BLOQUEADO]</span>
+           7  -  PROCESSAMENTO BATCH NOTURNO      <span class="dim">[BLOQUEADO]</span>
+
+           9  -  ENCERRAR SESSAO
+
+`;
+  renderScreen({
+    programa: 'MENU0001',
+    titulo: 'SIFAP - MENU PRINCIPAL',
+    subtitulo: 'SELECAO DE FUNCAO',
+    body,
+    msg: 'INFORME O NUMERO DA OPCAO DESEJADA E TECLE ENTER.',
+    pfkeys: 'PF1=AJUDA  PF3=SAIR  PF12=ENCERRAR SESSAO',
+    prompt: 'OPCAO ===>'
+  });
+}
+
+function showConsBenefForm() {
+  state.screen = 'CONS_BENEF';
+  state.nivel = '00010';
+  const body = `
+
+       CONSULTA INDIVIDUAL DE BENEFICIARIO POR NIS
+
+
+           NIS .........: ___________      <span class="dim">(11 DIGITOS)</span>
+
+
+       <span class="dim">EXEMPLOS DISPONIVEIS NA BASE DE DEMONSTRACAO:</span>
+       <span class="dim">    12345678901       23456789012       34567890123</span>
+       <span class="dim">    45678901234       56789012345       67890123456</span>
+       <span class="dim">    78901234567       89012345678</span>
+
+
+`;
+  renderScreen({
+    programa: 'CBENF010',
+    titulo: 'SIFAP - CONSULTA BENEFICIARIO',
+    subtitulo: 'INFORMACAO DO NIS PARA CONSULTA',
+    body,
+    msg: 'INFORME O NIS DO BENEFICIARIO E TECLE ENTER PARA CONSULTAR.',
+    pfkeys: 'PF1=AJUDA  PF3=VOLTAR  PF12=RETORNA AO MENU',
+    prompt: 'NIS ===>'
+  });
+}
+
+function showConsPagForm() {
+  state.screen = 'CONS_PAG';
+  state.nivel = '00020';
+  const body = `
+
+       CONSULTA DE HISTORICO DE PAGAMENTOS POR NIS
+
+
+           NIS .........: ___________      <span class="dim">(11 DIGITOS)</span>
+
+
+       <span class="dim">EXEMPLOS COM HISTORICO REGISTRADO:</span>
+       <span class="dim">    12345678901      23456789012      34567890123      45678901234</span>
+
+
+`;
+  renderScreen({
+    programa: 'CPAGT005',
+    titulo: 'SIFAP - CONSULTA PAGAMENTOS',
+    subtitulo: 'INFORMACAO DO NIS PARA CONSULTA',
+    body,
+    msg: 'INFORME O NIS E TECLE ENTER PARA EXIBIR O HISTORICO.',
+    pfkeys: 'PF1=AJUDA  PF3=VOLTAR  PF12=RETORNA AO MENU',
+    prompt: 'NIS ===>'
+  });
+}
+
+function showBenefDetail(nis) {
+  const b = BENEF.find(x => x.nis === nis);
+  if (!b) { showError('NAT3145', 'NIS NAO LOCALIZADO NA BASE DE BENEFICIARIOS.'); return; }
+  state.screen = 'BENEF_DETAIL';
+  state.nivel = '00011';
+  state.lastNis = nis;
+  const statusColor = b.status === 'ATIVO' ? 'amber' : (b.status === 'SUSPENSO' ? 'red' : 'dim');
+  const body = `
+
+   <span class="turq">IDENTIFICACAO</span>
+       <span class="blue">NIS .........:</span> ${b.nis}
+       <span class="blue">NOME ........:</span> ${b.nome}
+       <span class="blue">CPF .........:</span> ${b.cpf}
+       <span class="blue">DT NASCIMENTO:</span> ${b.nasc}
+
+   <span class="turq">ENDERECO</span>
+       <span class="blue">UF ..........:</span> ${b.uf}
+       <span class="blue">MUNICIPIO ...:</span> ${b.mun}
+
+   <span class="turq">BENEFICIO</span>
+       <span class="blue">PROGRAMA ....:</span> ${b.prog}
+       <span class="blue">VALOR MENSAL :</span> R$ ${lpad(b.valor.toFixed(2), 10)}
+       <span class="blue">STATUS ......:</span> <span class="${statusColor}">${b.status}</span>
+       <span class="blue">INICIO ......:</span> ${b.inicio}
+
+`;
+  renderScreen({
+    programa: 'CBENF020',
+    titulo: 'SIFAP - DETALHE DO BENEFICIARIO',
+    subtitulo: 'DADOS CADASTRAIS E DE BENEFICIO',
+    body,
+    msg: '<span class="amber">REGISTRO LOCALIZADO COM SUCESSO.</span>',
+    pfkeys: 'PF3=VOLTAR  PF5=PAGAMENTOS  PF7=NOVA CONSULTA  PF12=MENU',
+    prompt: 'COMANDO ===>'
+  });
+}
+
+function showPagamentos(nis) {
+  const b = BENEF.find(x => x.nis === nis);
+  if (!b) { showError('NAT3145', 'NIS NAO LOCALIZADO NA BASE DE BENEFICIARIOS.'); return; }
+  const pgs = PAGAMENTOS[nis] || [];
+  state.screen = 'PAG_LIST';
+  state.nivel = '00021';
+  state.lastNis = nis;
+
+  let body = `\n   NIS:  ${b.nis}     BENEFICIARIO: ${pad(b.nome, 38)}\n   PROG: ${pad(b.prog, 12)}\n\n`;
+  body += '   +------+-----------+------------+--------+--------+------------------+\n';
+  body += '   | MES  |  VALOR R$ |   STATUS   | BANCO  |   AG   |      CONTA       |\n';
+  body += '   +------+-----------+------------+--------+--------+------------------+\n';
+  if (pgs.length === 0) {
+    body += '   |              <span class="dim">NENHUM PAGAMENTO REGISTRADO PARA ESTE NIS</span>          |\n';
+  } else {
+    pgs.forEach(p => {
+      const stColor = p.status === 'PAGO' ? 'amber' : (p.status === 'BLOQ' ? 'red' : 'dim');
+      body += `   | ${pad(p.mes, 4)} |${lpad(p.valor.toFixed(2)+' ', 11)}|  <span class="${stColor}">${pad(p.status,8)}</span>  |  ${pad(p.banco,4)}  |  ${pad(p.ag,4)}  | ${pad(p.conta, 16)} |\n`;
+    });
+  }
+  body += '   +------+-----------+------------+--------+--------+------------------+\n';
+  body += '\n   <span class="dim">*** FIM DE LISTAGEM ***</span>\n';
+
+  const msg = pgs.length === 0
+    ? '<span class="amber">CONSULTA REALIZADA. NENHUM PAGAMENTO REGISTRADO.</span>'
+    : `<span class="amber">${pgs.length} REGISTRO(S) LOCALIZADO(S) COM SUCESSO.</span>`;
+  renderScreen({
+    programa: 'CPAGT010',
+    titulo: 'SIFAP - HISTORICO DE PAGAMENTOS',
+    subtitulo: 'PAGAMENTOS REGISTRADOS PARA O BENEFICIARIO',
+    body, msg,
+    pfkeys: 'PF3=VOLTAR  PF7=NOVA CONSULTA  PF8=DETALHE BENEF  PF12=MENU',
+    prompt: 'COMANDO ===>'
+  });
+}
+
+function showListaProg() {
+  state.screen = 'LIST_PROG';
+  state.nivel = '00030';
+  const body = `
+
+       SELECIONE O PROGRAMA PARA LISTAGEM
+
+
+           1  -  BPC          (BENEFICIO DE PRESTACAO CONTINUADA)
+           2  -  BOLSA FAM    (BOLSA FAMILIA)
+           3  -  AUX BRASIL   (AUXILIO BRASIL)
+
+           9  -  TODOS OS PROGRAMAS
+
+
+`;
+  renderScreen({
+    programa: 'LBENF030',
+    titulo: 'SIFAP - LISTAGEM POR PROGRAMA',
+    subtitulo: 'SELECAO DE FILTRO',
+    body,
+    msg: 'INFORME O NUMERO DO PROGRAMA E TECLE ENTER PARA LISTAR.',
+    pfkeys: 'PF1=AJUDA  PF3=VOLTAR  PF12=MENU',
+    prompt: 'OPCAO ===>'
+  });
+}
+
+function showBenefList(filter) {
+  state.screen = 'BENEF_LIST';
+  state.nivel = '00031';
+  let lista = BENEF;
+  if (filter) lista = BENEF.filter(b => b.prog === filter);
+  let body = `\n   FILTRO: ${pad(filter || 'TODOS', 14)}     TOTAL: ${lpad(lista.length, 4)} REGISTRO(S)\n\n`;
+  body += '   +-------------+--------------------------------+----+------------+----------+\n';
+  body += '   |     NIS     |             NOME               | UF |  PROGRAMA  |  STATUS  |\n';
+  body += '   +-------------+--------------------------------+----+------------+----------+\n';
+  lista.forEach(b => {
+    const stColor = b.status === 'ATIVO' ? 'amber' : (b.status === 'SUSPENSO' ? 'red' : 'dim');
+    body += `   | ${b.nis} | ${pad(b.nome, 30)} | ${b.uf} | ${pad(b.prog, 10)} | <span class="${stColor}">${pad(b.status, 8)}</span> |\n`;
+  });
+  body += '   +-------------+--------------------------------+----+------------+----------+\n';
+  body += '\n   <span class="dim">*** FIM DE LISTAGEM ***</span>\n';
+  renderScreen({
+    programa: 'LBENF031',
+    titulo: 'SIFAP - BENEFICIARIOS',
+    subtitulo: filter ? `PROGRAMA: ${filter}` : 'TODOS OS PROGRAMAS',
+    body,
+    msg: `<span class="amber">${lista.length} REGISTRO(S) LOCALIZADO(S). DIGITE NIS PARA DETALHE.</span>`,
+    pfkeys: 'PF3=VOLTAR  PF7=NOVO FILTRO  PF12=MENU',
+    prompt: 'NIS / CMD ===>'
+  });
+}
+
+function showRelatorio() {
+  state.screen = 'RELATORIO';
+  state.nivel = '00050';
+  const totais = {
+    BPC: BENEF.filter(b => b.prog === 'BPC' && b.status === 'ATIVO'),
+    BF:  BENEF.filter(b => b.prog === 'BOLSA FAM' && b.status === 'ATIVO'),
+    AB:  BENEF.filter(b => b.prog === 'AUX BRASIL' && b.status === 'ATIVO')
+  };
+  const sum = arr => arr.reduce((a,b) => a + b.valor, 0);
+  const totGeral = totais.BPC.length + totais.BF.length + totais.AB.length;
+  const valGeral = sum(totais.BPC) + sum(totais.BF) + sum(totais.AB);
+  const body = `
+
+   COMPETENCIA: 04/2026                       EMITIDO EM: ${now().data}
+
+
+   PROGRAMA           BENEF.ATIVOS    VALOR TOTAL R$
+   ---------------    ------------    ----------------
+   BPC                ${lpad(totais.BPC.length, 12)}    ${lpad(sum(totais.BPC).toFixed(2), 16)}
+   BOLSA FAMILIA      ${lpad(totais.BF.length, 12)}    ${lpad(sum(totais.BF).toFixed(2), 16)}
+   AUXILIO BRASIL     ${lpad(totais.AB.length, 12)}    ${lpad(sum(totais.AB).toFixed(2), 16)}
+   ---------------    ------------    ----------------
+   <span class="amber">TOTAL GERAL        ${lpad(totGeral, 12)}    ${lpad(valGeral.toFixed(2), 16)}</span>
+
+
+   <span class="dim">FONTE DOS DADOS .....: TABELA SIFAP-BENEF (ADABAS FILE 047)</span>
+   <span class="dim">REGRA DE NEGOCIO ....: PGM CALC-VALOR-MENSAL  (NATURAL CRPGM042)</span>
+   <span class="dim">ULTIMA EXECUCAO BATCH: 24/04/2026 23:47:12  (JOB SIFAPBT0)</span>
+
+`;
+  renderScreen({
+    programa: 'RGER010 ',
+    titulo: 'SIFAP - RELATORIO GERENCIAL',
+    subtitulo: 'CONSOLIDADO POR PROGRAMA',
+    body,
+    msg: '<span class="amber">RELATORIO GERADO COM SUCESSO. *** FIM DE RELATORIO ***</span>',
+    pfkeys: 'PF3=VOLTAR  PF7=NOVO PERIODO  PF12=MENU',
+    prompt: 'COMANDO ===>'
+  });
+}
+
+function showError(code, msg) {
+  println();
+  println(` <span class="red">*** ${code}  ${msg}</span>`);
+  println(` <span class="red">*** TECLE ENTER PARA CONTINUAR.</span>`);
+  cmdInput.value = '';
+  cmdInput.focus();
+}
+
+function showHelp() {
+  state.screen = 'HELP';
+  state.nivel = '99999';
+  const body = `
+
+       COMANDOS DISPONIVEIS NESTA SESSAO:
+
+
+       NUMEROS (NO MENU)        SELECIONAM A OPCAO DESEJADA
+       NIS (11 DIGITOS)         CONSULTA O BENEFICIARIO
+       PF3  /  VOLTAR           VOLTA A TELA ANTERIOR
+       PF12 /  LOGOFF           ENCERRA A SESSAO
+       MENU                     RETORNA AO MENU PRINCIPAL
+       HELP /  ?                EXIBE ESTA TELA
+
+       ATALHOS DIRETOS:
+       BENEF NIS=XXXXXXXXXXX    DETALHE DE BENEFICIARIO
+       PAG NIS=XXXXXXXXXXX      HISTORICO DE PAGAMENTOS
+       LIST                     LISTAGEM COMPLETA
+
+       CARACTERISTICAS DO SISTEMA:
+       LINGUAGEM ........: NATURAL 6.3 (SOFTWARE AG)
+       BANCO ............: ADABAS FILE 047
+       MONITOR ..........: COM-PLETE 7.4
+       LIBRARY ..........: SIFAPPRD
+       ANO IMPLANTACAO ..: 1997
+
+`;
+  renderScreen({
+    programa: 'HELP0001',
+    titulo: 'SIFAP - AJUDA OPERACIONAL',
+    subtitulo: 'COMANDOS E REFERENCIA TECNICA',
+    body,
+    msg: '<span class="amber">CONSULTA DE AJUDA EXIBIDA.</span>',
+    pfkeys: 'PF3=VOLTAR  PF12=MENU',
+    prompt: 'COMANDO ===>'
+  });
+}
+
+function logoff() {
+  clear();
+  state.screen = 'BOOT';
+  inputLine.style.display = 'none';
+  pfLineEl.textContent = '';
+  println();
+  println();
+  println();
+  println('              <span class="amber">*** SESSAO ENCERRADA COM SUCESSO ***</span>');
+  println();
+  println(`              USUARIO ........: ${state.user || '(NAO LOGADO)'}`);
+  println(`              DATA / HORA ....: ${now().data}  ${now().hora}`);
+  println(`              TERMINAL .......: ${state.terminal}`);
+  println();
+  println('              OBRIGADO POR UTILIZAR O SIFAP.');
+}
+
+function handleCommand(raw) {
+  const cmd = raw.trim().toUpperCase();
+  if (cmd) { state.history.push(cmd); state.histIdx = state.history.length; }
+  if (cmd === 'HELP' || cmd === '?')   { showHelp(); return; }
+  if (cmd === 'MENU' && state.user)    { showMenu(); return; }
+  if (cmd === 'LOGOFF' || cmd === 'PF12') { logoff(); return; }
+  if (cmd === 'PF3' || cmd === 'VOLTAR' || cmd === 'BACK') {
+    if (state.user) showMenu(); else showLogon();
+    return;
+  }
+  if (cmd.startsWith('BENEF NIS=')) { showBenefDetail(cmd.split('=')[1].trim()); return; }
+  if (cmd.startsWith('PAG NIS=')) { showPagamentos(cmd.split('=')[1].trim()); return; }
+  if (cmd === 'LIST') { showBenefList(null); return; }
+
+  switch (state.screen) {
+    case 'LOGON':
+      if (!cmd) { showError('NAT0936', 'USUARIO INVALIDO OU NAO INFORMADO.'); return; }
+      state.user = cmd.substring(0, 10);
+      showMenu();
+      break;
+    case 'MENU':
+      if (cmd === '1') showConsBenefForm();
+      else if (cmd === '2') showConsPagForm();
+      else if (cmd === '3') showListaProg();
+      else if (cmd === '4') showBenefList(null);
+      else if (cmd === '5') showRelatorio();
+      else if (cmd === '6' || cmd === '7') showError('NAT0850', 'FUNCAO BLOQUEADA. PERFIL INSUFICIENTE PARA ESTA OPERACAO.');
+      else if (cmd === '9') logoff();
+      else showError('NAT0937', 'OPCAO INVALIDA. SELECIONE UMA DAS OPCOES DO MENU.');
+      break;
+    case 'CONS_BENEF':
+      if (cmd.length === 11 && /^\d+$/.test(cmd)) showBenefDetail(cmd);
+      else showError('NAT0938', 'NIS DEVE CONTER 11 DIGITOS NUMERICOS.');
+      break;
+    case 'CONS_PAG':
+      if (cmd.length === 11 && /^\d+$/.test(cmd)) showPagamentos(cmd);
+      else showError('NAT0938', 'NIS DEVE CONTER 11 DIGITOS NUMERICOS.');
+      break;
+    case 'BENEF_DETAIL':
+      if (cmd === 'PF5') showPagamentos(state.lastNis);
+      else if (cmd === 'PF7') showConsBenefForm();
+      else showError('NAT0937', 'COMANDO NAO RECONHECIDO NESTA TELA.');
+      break;
+    case 'PAG_LIST':
+      if (cmd === 'PF7') showConsPagForm();
+      else if (cmd === 'PF8') showBenefDetail(state.lastNis);
+      else showError('NAT0937', 'COMANDO NAO RECONHECIDO NESTA TELA.');
+      break;
+    case 'LIST_PROG':
+      if (cmd === '1') showBenefList('BPC');
+      else if (cmd === '2') showBenefList('BOLSA FAM');
+      else if (cmd === '3') showBenefList('AUX BRASIL');
+      else if (cmd === '9') showBenefList(null);
+      else showError('NAT0937', 'OPCAO INVALIDA. SELECIONE UMA DAS OPCOES.');
+      break;
+    case 'BENEF_LIST':
+      if (cmd.length === 11 && /^\d+$/.test(cmd)) showBenefDetail(cmd);
+      else if (cmd === 'PF7') showListaProg();
+      else showError('NAT0937', 'COMANDO NAO RECONHECIDO NESTA TELA.');
+      break;
+    case 'RELATORIO':
+    case 'HELP':
+      showError('NAT0937', 'USE PF3 OU MENU PARA NAVEGAR.');
+      break;
+    default:
+      showError('NAT9999', 'ESTADO DESCONHECIDO. USE PF3.');
+  }
+}
+
+cmdInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { handleCommand(cmdInput.value); }
+  else if (e.key === 'ArrowUp') {
+    if (state.histIdx > 0) { state.histIdx--; cmdInput.value = state.history[state.histIdx]; syncInputWidth(); }
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown') {
+    if (state.histIdx < state.history.length - 1) { state.histIdx++; cmdInput.value = state.history[state.histIdx]; }
+    else { cmdInput.value = ''; state.histIdx = state.history.length; }
+    syncInputWidth();
+    e.preventDefault();
+  } else if (e.key === 'F3') { e.preventDefault(); handleCommand('PF3'); }
+  else if (e.key === 'F5') { /* deixa o browser recarregar */ }
+  else if (e.key === 'F7') { e.preventDefault(); handleCommand('PF7'); }
+  else if (e.key === 'F8') { e.preventDefault(); handleCommand('PF8'); }
+  else if (e.key === 'F12') { e.preventDefault(); handleCommand('PF12'); }
+});
+
+// Sincroniza largura do <input> com o conteudo digitado, para que o
+// cursor (block verde piscante) fique sempre grudado no fim do texto
+// e nao no canto direito da linha (como ficaria com flex: 1).
+function syncInputWidth() {
+  const len = cmdInput.value.length;
+  cmdInput.style.width = (len + 0.5) + 'ch';
+}
+cmdInput.addEventListener('input', syncInputWidth);
+cmdInput.addEventListener('focus', syncInputWidth);
+syncInputWidth();
+
+// Atalho global F2 = modo demo. F11 e F5 ficam para o browser.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'F2') { e.preventDefault(); startDemo(); }
+});
+
+document.addEventListener('click', () => cmdInput.focus());
+
+// ============ MODO DEMO ============
+let demoRunning = false;
+async function startDemo() {
+  if (demoRunning) return;
+  demoRunning = true;
+  state = { screen: 'BOOT', user: null, terminal: 'T0001', nivel: '-----', history: [], histIdx: -1 };
+  await bootSequence();
+  await sleep(800);
+  await runDemoSequence();
+  demoRunning = false;
+}
+
+async function typeInto(text, delay) {
+  cmdInput.value = '';
+  syncInputWidth();
+  for (let i = 0; i < text.length; i++) {
+    cmdInput.value += text[i];
+    syncInputWidth();
+    await sleep(delay);
+  }
+}
+
+async function runDemoSequence() {
+  while (state.screen !== 'LOGON') await sleep(200);
+  await sleep(800);
+  await typeInto('OPERADOR1', 70); await sleep(600); handleCommand(cmdInput.value); await sleep(1500);
+  await typeInto('1', 100); await sleep(500); handleCommand(cmdInput.value); await sleep(1200);
+  await typeInto('12345678901', 55); await sleep(500); handleCommand(cmdInput.value); await sleep(2500);
+  await typeInto('PF5', 100); await sleep(500); handleCommand(cmdInput.value); await sleep(2500);
+  await typeInto('MENU', 80); await sleep(400); handleCommand(cmdInput.value); await sleep(1500);
+  await typeInto('5', 100); await sleep(500); handleCommand(cmdInput.value); await sleep(3000);
+  await typeInto('MENU', 80); await sleep(400); handleCommand(cmdInput.value); await sleep(1500);
+  await typeInto('3', 100); await sleep(500); handleCommand(cmdInput.value); await sleep(1500);
+  await typeInto('1', 100); await sleep(500); handleCommand(cmdInput.value); await sleep(2500);
+}
+
+// ============ AUTO-FIT DINAMICO ============
+// Recalcula font-size e padding pra que as 80 colunas SEMPRE preencham
+// a tela disponivel, escalando proporcionalmente a cada resize.
+
+const terminalEl = document.querySelector('.terminal');
+let charRatio = 0.55;
+
+function measureCharRatio() {
+  const probe = document.createElement('span');
+  probe.style.cssText = `
+    font-family: 'IBM3270', 'VT323', 'Lucida Console', 'Consolas', 'Courier New', monospace;
+    font-size: 100px;
+    letter-spacing: 1px;
+    white-space: pre;
+    position: absolute;
+    visibility: hidden;
+    left: -9999px;
+    top: 0;
+  `;
+  const N = 100;
+  probe.textContent = 'M'.repeat(N);
+  document.body.appendChild(probe);
+  const totalW = probe.getBoundingClientRect().width;
+  document.body.removeChild(probe);
+  if (totalW > 0) charRatio = (totalW / N) / 100;
+}
+
+function fitTerminal() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  const padX = Math.max(24, W * 0.035);
+  const padY = Math.max(20, H * 0.030);
+
+  const usableW = W - padX * 2;
+  const usableH = H - padY * 2;
+
+  const COLS = 82;
+  const ROWS = 28;
+  const LH = 1.05;
+
+  const fsByWidth = usableW / (COLS * charRatio);
+  const fsByHeight = usableH / (ROWS * LH);
+
+  const fontSize = Math.max(12, Math.min(fsByWidth, fsByHeight));
+
+  terminalEl.style.fontSize = fontSize + 'px';
+  terminalEl.style.padding = padY + 'px ' + padX + 'px';
+}
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    measureCharRatio();
+    fitTerminal();
+  });
+}
+measureCharRatio();
+fitTerminal();
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    measureCharRatio();
+    fitTerminal();
+  }, 80);
+});
+
+document.addEventListener('fullscreenchange', () => setTimeout(fitTerminal, 100));
+document.addEventListener('webkitfullscreenchange', () => setTimeout(fitTerminal, 100));
+
+bootSequence();
+</script>
+</body>
+</html>

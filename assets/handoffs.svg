@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" font-family="Inter, system-ui, sans-serif">
+  <rect width="1200" height="560" fill="#F7F7F5"/>
+
+  <text x="60" y="60" fill="#737373" font-family="JetBrains Mono, monospace" font-size="16" font-weight="500" letter-spacing="1.9">DIA 2 · PASSAGENS ENTRE ESTÁGIOS</text>
+  <text x="60" y="110" fill="#1A1A1A" font-size="42" font-weight="500" letter-spacing="-0.8">As três passagens H1, H2, H3</text>
+  <text x="60" y="148" fill="#737373" font-size="20">Conversa de 5 minutos entre o par que sai e o par que entra. Onde o dia flui ou quebra.</text>
+
+  <!-- 4 stage cards horizontal -->
+  <!-- Card width 220, x at 60, 350, 640, 920 -->
+
+  <!-- H1 -->
+  <g transform="translate(60, 220)">
+    <rect width="220" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="6" fill="#F25022"/>
+    <text x="20" y="44" fill="#B33816" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">ESTÁGIO 01 · ARQUEOLOGIA</text>
+    <text x="20" y="78" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="0.5">11:00 – 14:00</text>
+    <text x="20" y="118" fill="#1A1A1A" font-size="18" font-weight="500">Todos os 5 pares</text>
+    <text x="20" y="138" fill="#1A1A1A" font-size="18" font-weight="500">em paralelo</text>
+    <text x="20" y="170" fill="#737373" font-size="13">3 programas por par.</text>
+    <text x="20" y="188" fill="#737373" font-size="13">5 artefatos consolidados:</text>
+    <text x="20" y="206" fill="#737373" font-size="13">glossário, catálogo BR,</text>
+    <text x="20" y="221" fill="#737373" font-size="11">mapa deps, mistérios, report.</text>
+  </g>
+
+  <g transform="translate(350, 220)">
+    <rect width="220" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="6" fill="#FFB900"/>
+    <text x="20" y="44" fill="#B88500" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">ESTÁGIO 02 · SPEC MODERNA</text>
+    <text x="20" y="78" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="0.5">14:00 – 15:00</text>
+    <text x="20" y="118" fill="#1A1A1A" font-size="18" font-weight="500">Par 2 lidera</text>
+    <text x="20" y="138" fill="#1A1A1A" font-size="18" font-weight="500">EARS + ADRs + C4</text>
+    <text x="20" y="170" fill="#737373" font-size="13">Cada REQ-ID cita</text>
+    <text x="20" y="188" fill="#737373" font-size="13">source_legacy ou</text>
+    <text x="20" y="206" fill="#737373" font-size="13">[GREENFIELD] explícito.</text>
+  </g>
+
+  <g transform="translate(640, 220)">
+    <rect width="220" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="6" fill="#7FBA00"/>
+    <text x="20" y="44" fill="#5A8500" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">ESTÁGIO 03 · IMPLEMENTAÇÃO</text>
+    <text x="20" y="78" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="0.5">15:00 – 16:10</text>
+    <text x="20" y="118" fill="#1A1A1A" font-size="18" font-weight="500">Pares 3 + 4</text>
+    <text x="20" y="138" fill="#1A1A1A" font-size="18" font-weight="500">lideram</text>
+    <text x="20" y="170" fill="#737373" font-size="13">Cada commit cita</text>
+    <text x="20" y="188" fill="#737373" font-size="13">Implements REQ-XXX.</text>
+    <text x="20" y="206" fill="#737373" font-size="13">Cobertura ≥ 70%.</text>
+  </g>
+
+  <g transform="translate(920, 220)">
+    <rect width="220" height="220" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <rect x="0" y="0" width="220" height="6" fill="#1A1A1A"/>
+    <text x="20" y="44" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">ESTÁGIO 04 · EVOLUÇÃO</text>
+    <text x="20" y="78" fill="#737373" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="0.5">16:10 – 16:50</text>
+    <text x="20" y="118" fill="#1A1A1A" font-size="18" font-weight="500">Par 5 lidera</text>
+    <text x="20" y="138" fill="#1A1A1A" font-size="18" font-weight="500">Par 3 co-lidera</text>
+    <text x="20" y="170" fill="#737373" font-size="13">Issues bem escritas →</text>
+    <text x="20" y="188" fill="#737373" font-size="13">Copilot Agent abre PR →</text>
+    <text x="20" y="206" fill="#737373" font-size="13">Par 3 revisa.</text>
+  </g>
+
+  <!-- Handoff labels between cards (centered) -->
+  <!-- H1 between card1 and card2: center at x=315 -->
+  <g transform="translate(280, 322)">
+    <line x1="0" y1="0" x2="70" y2="0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#arrowBlack)"/>
+    <text x="35" y="-12" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" letter-spacing="0.5" text-anchor="middle">H1</text>
+    <text x="35" y="22" fill="#737373" font-size="11" text-anchor="middle">legado → spec</text>
+  </g>
+
+  <g transform="translate(570, 322)">
+    <line x1="0" y1="0" x2="70" y2="0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#arrowBlack)"/>
+    <text x="35" y="-12" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" letter-spacing="0.5" text-anchor="middle">H2</text>
+    <text x="35" y="22" fill="#737373" font-size="11" text-anchor="middle">spec → código</text>
+  </g>
+
+  <g transform="translate(860, 322)">
+    <line x1="0" y1="0" x2="60" y2="0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#arrowBlack)"/>
+    <text x="30" y="-12" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" letter-spacing="0.5" text-anchor="middle">H3</text>
+    <text x="30" y="22" fill="#737373" font-size="11" text-anchor="middle">código → ops</text>
+  </g>
+
+  <defs>
+    <marker id="arrowBlack" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/>
+    </marker>
+  </defs>
+
+  <!-- Bottom rule callouts -->
+  <g transform="translate(60, 480)">
+    <rect width="1080" height="60" fill="#FFFFFF" stroke="#E5E5E0" stroke-width="1"/>
+    <text x="20" y="28" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" letter-spacing="1.2">REGRAS DE PASSAGEM</text>
+    <text x="20" y="48" fill="#737373" font-size="12">Conversa síncrona de 5 min · Par receptor confirma o que vai usar · Não vale "leia depois" · Sem passagem clara, próximo estágio não começa.</text>
+  </g>
+</svg>
