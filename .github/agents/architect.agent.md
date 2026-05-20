@@ -2,10 +2,7 @@
 name: architect
 description: "Agente do Estágio 2 — recorta bounded contexts, escreve specs EARS, gera ADRs, projeta arquitetura de Modular Monolith"
 model: claude-opus-4-7
-tools:
-  - codebase
-  - search
-  - fetch
+tools: vscode, read, edit, search, web, 'com.microsoft/azure/*', 'microsoftdocs/mcp/*', browser, ms-azuretools.vscode-azure-github-copilot/azure_query_azure_resource_graph, ms-azuretools.vscode-azure-github-copilot/azure_get_auth_context, ms-azuretools.vscode-azure-github-copilot/azure_set_auth_context, ms-azuretools.vscode-azure-github-copilot/azure_get_dotnet_template_tags, ms-azuretools.vscode-azure-github-copilot/azure_get_dotnet_templates_for_tag, ms-vscode.vscode-websearchforcopilot/websearch, todo
 ---
 
 # @architect-agent

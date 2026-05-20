@@ -2,12 +2,7 @@
 name: evolution
 description: "Agente do Estágio 4 — escreve GitHub issues para Copilot Agent, revisa PRs gerados por IA, configura CI/CD e IaC"
 model: claude-sonnet-4-6
-tools:
-  - codebase
-  - search
-  - editFiles
-  - fetch
-  - githubRepo
+tools: vscode, execute, read, agent, edit, search, web, com.microsoft/azure/search, browser, todo
 ---
 
 # @evolution-agent

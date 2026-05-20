@@ -2,7 +2,7 @@
 name: archaeologist
 description: "Agente do Estágio 1 — lê código legado Natural/Adabas, extrai regras de negócio, mapeia dependências, cataloga mistérios"
 model: claude-opus-4-7
-tools: vscode, read, search, web, com.microsoft/azure/search, 'microsoftdocs/mcp/*', browser, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-vscode.vscode-websearchforcopilot/websearch, todo
+tools: vscode, read, com.microsoft/azure/search, web, com.microsoft/azure/search, 'microsoftdocs/mcp/*', browser, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-vscode.vscode-websearchforcopilot/websearch, todo
 ---
 
 # @archaeologist-agent
