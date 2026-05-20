@@ -4,7 +4,7 @@
 
 ![ESTÁGIO 02 Spec Moderna](https://img.shields.io/badge/ESTÁGIO-02%20Spec%20Moderna-00A4EF?style=for-the-badge) ![TIPO Requirements](https://img.shields.io/badge/TIPO-Requirements-1A1A1A?style=for-the-badge) ![STATUS Draft](https://img.shields.io/badge/STATUS-Draft-FFB900?style=for-the-badge)
 
-> 🗺 **Você está aqui:** [Kit PT-BR](../README.md) → [Estágio 2](README.md) → **Requirements**
+> 🗺 **Você está aqui:** [Kit PT-BR](../../README.md) → [Estágio 2](../README.md) → **Requirements**
 
 > **Para quem é isto?** Documento-base que sintetiza requisitos funcionais e não-funcionais do SIFAP 2.0, alimentando `/speckit.specify` (EARS) e ADRs do Estágio 2.
 
@@ -20,9 +20,9 @@
 
 | Fonte | Conteúdo | Quantidade |
 |---|---|---|
-| [`business-rules-catalog.final.md`](../01-arqueologia/output-requisitos/business-rules-catalog.final.md) | Regras de negócio extraídas do legado | 71 BR (18 críticas) |
-| [`mysteries-found.final.md`](../01-arqueologia/output-requisitos/mysteries-found.final.md) | Achados que viraram NFR/decisões | 24 achados |
-| [`discovery-report.final.md`](../01-arqueologia/output-requisitos/discovery-report.final.md) | 4 bounded contexts + recomendações migrar/descartar/evoluir | 4 contextos |
+| [`business-rules-catalog.final.md`](../../01-arqueologia/output-requisitos/business-rules-catalog.final.md) | Regras de negócio extraídas do legado | 71 BR (18 críticas) |
+| [`mysteries-found.final.md`](../../01-arqueologia/output-requisitos/mysteries-found.final.md) | Achados que viraram NFR/decisões | 24 achados |
+| [`discovery-report.final.md`](../../01-arqueologia/output-requisitos/discovery-report.final.md) | 4 bounded contexts + recomendações migrar/descartar/evoluir | 4 contextos |
 | [`techstack.md`](techstack.md) | Stack-alvo (Java 21 + Next.js + PostgreSQL + Azure) | 22 tecnologias |
 | `legacy-docs/REGRAS-NEGOCIO-2012.md` | Visão da analista de negócios SENARC | DRAFT |
 | Volumetria atual (`legado-sifap/`) | 4.2M beneficiários, 180M pagamentos, +3.8M/mês | — |
@@ -212,8 +212,8 @@ Restrições não-negociáveis impostas pelo contexto.
 | ID | Restrição | Origem |
 |---|---|---|
 | CON-001 | Stack-alvo é Java 21 + Spring Boot 3.3 + Next.js 15 + PostgreSQL 16 + Azure (sem desvios) | [`techstack.md`](techstack.md) + workshop |
-| CON-002 | Arquitetura é Modular Monolith — não microservices | [`modular-monolith.instructions.md`](../.github/instructions/modular-monolith.instructions.md) |
-| CON-003 | Todo REQ-ID em `02-spec-moderna/` precisa de `source_legacy:` apontando para `.NSN`/`.ddm` ou `[GREENFIELD]` | [`LEGACY-EXPLORATION-CHECKLIST.md`](../01-arqueologia/LEGACY-EXPLORATION-CHECKLIST.md) |
+| CON-002 | Arquitetura é Modular Monolith — não microservices | [`modular-monolith.instructions.md`](../../.github/instructions/modular-monolith.instructions.md) |
+| CON-003 | Todo REQ-ID em `02-spec-moderna/` precisa de `source_legacy:` apontando para `.NSN`/`.ddm` ou `[GREENFIELD]` | [`LEGACY-EXPLORATION-CHECKLIST.md`](../../01-arqueologia/LEGACY-EXPLORATION-CHECKLIST.md) |
 | CON-004 | Integração CNAB 240 com Banco do Brasil deve ser preservada (não pode mudar layout) | Sistema bancário externo |
 | CON-005 | Integração SIAFI (federal) deve ser preservada | Sistema federal externo |
 | CON-006 | Trilha de auditoria não pode permitir UPDATE/DELETE (imutabilidade legal) | IN-TCU 63/2010 |
@@ -289,31 +289,14 @@ Decisões que precisam ser resolvidas antes do `/speckit.specify` finalizar EARS
 ## Referências
 
 - [Tech Stack](techstack.md) — escolhas tecnológicas
-- [ADR Template](ADR-TEMPLATE.md) — formato dos ADRs
-- [Scope Decisions](scope-decisions.md) — decisões de escopo migrar/descartar/evoluir
-- [Business Rules Catalog](../01-arqueologia/output-requisitos/business-rules-catalog.final.md) — 71 BRs do legado
-- [Mysteries Found](../01-arqueologia/output-requisitos/mysteries-found.final.md) — 24 achados
-- [Discovery Report](../01-arqueologia/output-requisitos/discovery-report.final.md) — síntese Estágio 1
-- [LEGACY-EXPLORATION-CHECKLIST](../01-arqueologia/LEGACY-EXPLORATION-CHECKLIST.md) — regra dura de `source_legacy`
+- [ADR Template](../ADR-TEMPLATE.md) — formato dos ADRs
+- [Scope Decisions](../scope-decisions.md) — decisões de escopo migrar/descartar/evoluir
+- [Business Rules Catalog](../../01-arqueologia/output-requisitos/business-rules-catalog.final.md) — 71 BRs do legado
+- [Mysteries Found](../../01-arqueologia/output-requisitos/mysteries-found.final.md) — 24 achados
+- [Discovery Report](../../01-arqueologia/output-requisitos/discovery-report.final.md) — síntese Estágio 1
+- [LEGACY-EXPLORATION-CHECKLIST](../../01-arqueologia/LEGACY-EXPLORATION-CHECKLIST.md) — regra dura de `source_legacy`
 - [ISO 25010 — System and Software Quality Models](https://iso25000.com/index.php/en/iso-25000-standards/iso-25010) — taxonomia de NFR
 
 ---
 
-### Continuar a leitura
 
-<table width="100%">
-<tr>
-<td width="50%" valign="top" align="left">
-<sub><strong>← ANTERIOR</strong></sub><br/>
-<a href="techstack.md"><strong>Tech Stack</strong></a><br/>
-<sub>Escolhas tecnológicas do SIFAP 2.0.</sub>
-</td>
-<td width="50%" valign="top" align="right">
-<sub><strong>PRÓXIMO →</strong></sub><br/>
-<a href="GUIDE.md"><strong>GUIDE do Estágio 2</strong></a><br/>
-<sub>Passo a passo para EARS, ADRs e C4.</sub>
-</td>
-</tr>
-</table>
-
-<sub>↑ <a href="../README.md">Voltar ao Kit PT-BR</a></sub>

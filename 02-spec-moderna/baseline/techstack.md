@@ -4,7 +4,7 @@
 
 ![ESTÁGIO 02 Spec Moderna](https://img.shields.io/badge/ESTÁGIO-02%20Spec%20Moderna-00A4EF?style=for-the-badge) ![TIPO Reference](https://img.shields.io/badge/TIPO-Reference-1A1A1A?style=for-the-badge) ![STATUS Aprovado](https://img.shields.io/badge/STATUS-Aprovado-7FBA00?style=for-the-badge)
 
-> 🗺 **Você está aqui:** [Kit PT-BR](../README.md) → [Estágio 2](README.md) → **Tech Stack**
+> 🗺 **Você está aqui:** [Kit PT-BR](../../README.md) → [Estágio 2](../README.md) → **Tech Stack**
 
 > **Para quem é isto?** Para o Par 2 (EA + SA) antes de escrever ADRs e EARS. Para o Par 3 (TL + Dev) antes de codificar. Para o Par 5 (DevOps) antes de provisionar infra.
 >
@@ -128,14 +128,14 @@
 
 | Decisão | Source |
 |---|---|
-| Modular Monolith (não microservices) | [`modular-monolith.instructions.md`](../.github/instructions/modular-monolith.instructions.md) |
-| Java 21 + Spring Boot 3.3 | [`backend.instructions.md`](../.github/instructions/backend.instructions.md) |
-| Next.js 15 + TypeScript strict | [`frontend-spec.instructions.md`](../.github/instructions/frontend-spec.instructions.md) |
-| PostgreSQL 16 + Flyway | [`database.instructions.md`](../.github/instructions/database.instructions.md) |
-| Terraform + Azure | [`infrastructure.instructions.md`](../.github/instructions/infrastructure.instructions.md) |
-| OWASP Top 10 + Managed Identity | [`security.instructions.md`](../.github/instructions/security.instructions.md) |
-| GitHub Actions com OIDC + SHA-pinned | [`cicd.instructions.md`](../.github/instructions/cicd.instructions.md) |
-| Testes: AAA, mocks só de externos, ≥70% cobertura linhas | [`tests.instructions.md`](../.github/instructions/tests.instructions.md) |
+| Modular Monolith (não microservices) | [`modular-monolith.instructions.md`](../../.github/instructions/modular-monolith.instructions.md) |
+| Java 21 + Spring Boot 3.3 | [`backend.instructions.md`](../../.github/instructions/backend.instructions.md) |
+| Next.js 15 + TypeScript strict | [`frontend-spec.instructions.md`](../../.github/instructions/frontend-spec.instructions.md) |
+| PostgreSQL 16 + Flyway | [`database.instructions.md`](../../.github/instructions/database.instructions.md) |
+| Terraform + Azure | [`infrastructure.instructions.md`](../../.github/instructions/infrastructure.instructions.md) |
+| OWASP Top 10 + Managed Identity | [`security.instructions.md`](../../.github/instructions/security.instructions.md) |
+| GitHub Actions com OIDC + SHA-pinned | [`cicd.instructions.md`](../../.github/instructions/cicd.instructions.md) |
+| Testes: AAA, mocks só de externos, ≥70% cobertura linhas | [`tests.instructions.md`](../../.github/instructions/tests.instructions.md) |
 
 ## 8. Versionamento
 
@@ -151,34 +151,15 @@ Este documento é fonte da verdade para a stack. Mudanças exigem:
 ## Referências
 
 - [Project Constitution](/.specify/memory/constitution.md) (a ser criada via `/speckit.constitution`)
-- [Backend conventions](../.github/instructions/backend.instructions.md)
-- [Frontend conventions](../.github/instructions/frontend-spec.instructions.md)
-- [Database conventions](../.github/instructions/database.instructions.md)
-- [Modular Monolith patterns](../.github/instructions/modular-monolith.instructions.md)
-- [Security conventions](../.github/instructions/security.instructions.md)
-- [Infrastructure conventions](../.github/instructions/infrastructure.instructions.md)
-- [CI/CD conventions](../.github/instructions/cicd.instructions.md)
-- [Tests conventions](../.github/instructions/tests.instructions.md)
-- [Discovery report Estágio 1](../01-arqueologia/output-requisitos/discovery-report.final.md) — input que justifica escolhas
-- [Business rules catalog](../01-arqueologia/output-requisitos/business-rules-catalog.final.md) — 71 regras com `source_legacy`
+- [Backend conventions](../../.github/instructions/backend.instructions.md)
+- [Frontend conventions](../../.github/instructions/frontend-spec.instructions.md)
+- [Database conventions](../../.github/instructions/database.instructions.md)
+- [Modular Monolith patterns](../../.github/instructions/modular-monolith.instructions.md)
+- [Security conventions](../../.github/instructions/security.instructions.md)
+- [Infrastructure conventions](../../.github/instructions/infrastructure.instructions.md)
+- [CI/CD conventions](../../.github/instructions/cicd.instructions.md)
+- [Tests conventions](../../.github/instructions/tests.instructions.md)
+- [Discovery report Estágio 1](../../01-arqueologia/output-requisitos/discovery-report.final.md) — input que justifica escolhas
+- [Business rules catalog](../../01-arqueologia/output-requisitos/business-rules-catalog.final.md) — 71 regras com `source_legacy`
 
 ---
-
-### Continuar a leitura
-
-<table width="100%">
-<tr>
-<td width="50%" valign="top" align="left">
-<sub><strong>← ANTERIOR</strong></sub><br/>
-<a href="README.md"><strong>Estágio 2 — README</strong></a><br/>
-<sub>Visão geral do estágio.</sub>
-</td>
-<td width="50%" valign="top" align="right">
-<sub><strong>PRÓXIMO →</strong></sub><br/>
-<a href="GUIDE.md"><strong>GUIDE do Estágio 2</strong></a><br/>
-<sub>Passo a passo para EARS, ADRs e C4.</sub>
-</td>
-</tr>
-</table>
-
-<sub>↑ <a href="../README.md">Voltar ao Kit PT-BR</a></sub>
