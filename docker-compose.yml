@@ -20,7 +20,7 @@ services:
 
   backend:
     build:
-      context: ./prototype/backend
+      context: ./03-implementacao/backend
       dockerfile: Dockerfile
     container_name: sifap-backend
     environment:
