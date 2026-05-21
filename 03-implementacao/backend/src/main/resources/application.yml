@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: sifap-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/sifap}
+    username: ${DB_USER:sifap}
+    password: ${DB_PASSWORD:sifap}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 4
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.batch_size: 1000
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/beneficiary,classpath:db/migration/payment
+    baseline-on-migrate: false
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false   # jobs run on demand only, never on startup
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: sifap-backend
+
+sifap:
+  cpf:
+    allowTestCpfs: false   # ADR-008. Boot guard refuses prod with true.
+  jobs:
+    ageCategory:
+      cron: "0 0 2 * * *"   # daily 02:00, CL-003
+  cycle:
+    scheduler:
+      enabled: false   # FR-030, off by default. SENARC flips per environment.
+    idleTimeout: PT4H   # CL-003 / FR-EQUIV stale detection
+    region99:
+      bypass:
+        enabled: true   # BR-024 / MYS-008 preserved. SENARC ruling required to disable.
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+  level:
+    br.gov.sifap: INFO
+    org.springframework.batch: INFO

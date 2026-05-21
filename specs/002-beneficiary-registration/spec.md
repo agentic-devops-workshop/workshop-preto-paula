@@ -196,14 +196,48 @@ An authorized operator updates non-immutable beneficiary fields (address, phone,
 - [ADR-007](../../02-spec-moderna/baseline/ADR-007-pii-masking-policy.md) — CPF masking pattern, reveal endpoint
 - [ADR-008](../../02-spec-moderna/baseline/ADR-008-cpf-test-backdoors.md) — feature flag, boot guard
 
-## Open Questions
+## Clarifications Resolved (2026-05-20)
 
-> Items requiring `/speckit.clarify` or SENARC confirmation before implementation.
+The following items were resolved during `/speckit.clarify` with workshop-default decisions. Items pending SENARC validation are marked `[PENDING-SENARC]` — implementation proceeds with the documented default and the actual value lives in configuration that can be flipped without redeploy.
 
-1. **[NEEDS-CLARIFICATION]** Final value of `max_dependents` default — SENARC validation of 3 vs 5 vs 10 (open per `requirements.md` §6.1, MYS-002).
-2. **[NEEDS-CLARIFICATION]** Final lifecycle state machine — confirm allowed transitions (e.g., is `Cancelled → Active` ever permitted via a reinstatement workflow?).
-3. **[NEEDS-CLARIFICATION]** Daily age-category job execution time and timezone (suggested: 02:00 America/Sao_Paulo).
-4. **[NEEDS-CLARIFICATION]** Soft-delete vs hard-delete on `DELETE /api/v1/beneficiaries/{cpf}`: presumed soft (lifecycle → `Cancelled` with retention per LGPD), pending PO confirmation.
+### CL-001 — `max_dependents` default
+
+- **Decision**: default = **5**, stored per program in `social_program.max_dependents NOT NULL DEFAULT 5`.
+- **Rationale**: matches the value in production today (`CADDEPEND.NSN#L57-L59`). The 2008 manual claimed 3 but the operational reality is 5; the DDM permits up to 10.
+- **Status**: `[PENDING-SENARC]` — production rollout requires written confirmation from SENARC.
+- **Fallback**: if SENARC confirms 3, ops flips the column default and applies a migration; no code change.
+
+### CL-002 — Lifecycle state machine
+
+- **Decision**: explicit transitions documented below. `Cancelled → Active` is **NOT** permitted (terminal state).
+
+| From → To | Allowed | Reason field required |
+|---|---|---|
+| `Active` → `Suspended` | ✅ | Yes |
+| `Active` → `Cancelled` | ✅ | Yes |
+| `Active` → `Inactive` | ✅ | Yes (program ended) |
+| `Suspended` → `Active` | ✅ | Yes (reinstatement) |
+| `Suspended` → `Cancelled` | ✅ | Yes |
+| `Suspended` → `Disabled` | ✅ | Yes (death, disqualification) |
+| `Inactive` → `Active` | ✅ | Yes (new enrollment in same program) |
+| `Cancelled` → * | ❌ | terminal state |
+| `Disabled` → * | ❌ | terminal state |
+
+- **Rationale**: aligns with legacy implicit behavior (`CADBENEF.NSN` + audit trail showed no `Cancelled → Active` historically). Reinstatement from `Cancelled` requires a brand-new beneficiary record.
+
+### CL-003 — Age category job schedule
+
+- **Decision**: daily at **02:00 America/Sao_Paulo**, configurable via `sifap.jobs.ageCategory.cron` (default `0 0 2 * * *`).
+- **Rationale**: outside the payment batch window (which runs on the 1st business day at 02:00 UTC). Daily granularity avoids late status updates on birthday.
+- **Implementation**: Spring `@Scheduled` (one-off job, not a batch — single SQL UPDATE pattern; see plan.md).
+
+### CL-004 — Soft-delete on `DELETE /api/v1/beneficiaries/{cpf}`
+
+- **Decision**: **soft delete**. `DELETE` transitions `lifecycleStatus` to `Cancelled` with `cancelledAt` timestamp and `reason` (mandatory). Row is preserved for 10-year LGPD/IN-TCU retention.
+- **Rationale**: hard delete violates CON-006 (audit immutability) and CON-007 (10-year retention). Hard delete would also break `source_legacy_isn` traceability for migrated rows.
+- **Hard delete endpoint**: provided only via `DELETE /api/v1/admin/beneficiaries/{cpf}/purge` with `ADM` role + `reason` + 24h-old `Cancelled` precondition. Used exclusively for LGPD right-to-erasure compliance (rare).
+
+---
 
 ## Out of Scope
 
