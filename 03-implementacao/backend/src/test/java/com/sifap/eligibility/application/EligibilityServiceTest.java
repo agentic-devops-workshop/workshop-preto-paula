@@ -1,7 +1,7 @@
 package com.sifap.eligibility.application;
 
 import com.sifap.eligibility.api.BeneficiaryEligibilityPort;
-import com.sifap.eligibility.domain.EligibilityResult;
+import com.sifap.eligibility.api.EligibilityResult;
 import com.sifap.eligibility.interfaces.dto.Region99BeneficiaryDto;
 import com.sifap.eligibility.interfaces.dto.Region99ReportDto;
 import com.sifap.eligibility.interfaces.dto.SimulateRequest;

@@ -1,6 +1,6 @@
 package com.sifap.eligibility.infrastructure;
 
-import com.sifap.eligibility.domain.EligibilityResult;
+import com.sifap.eligibility.api.EligibilityResult;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

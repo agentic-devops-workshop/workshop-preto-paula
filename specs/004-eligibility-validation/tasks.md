@@ -63,7 +63,7 @@ description: "Task list for feature 004 — Eligibility Validation"
 
 - [x] T011 [US1] Implement pure function `EligibilityValidator.validate(criteria, birthDate, income, dependents, regionCode, referenceDate)` in `03-implementacao/backend/src/main/java/com/sifap/eligibility/domain/EligibilityValidator.java` — order: input validation → region-99 short-circuit → program presence/retired → type dispatch (research R-001, R-003, R-004)
 - [x] T012 [US1] Implement `DefaultEligibilityPortAdapter` (component) in `03-implementacao/backend/src/main/java/com/sifap/eligibility/infrastructure/DefaultEligibilityPortAdapter.java` — calls validator, emits `RegionBypassEvaluated` via `ApplicationEventPublisher` at WARN on bypass (research R-005)
-- [ ] T013 [US1] [CROSS-BRANCH] Wire the port into the `beneficiary` module on the existing branch `002-beneficiary-registration`: `BeneficiaryService.register(...)` calls `BeneficiaryEligibilityPort.validate(...)` and translates `Ineligible` to 422 with RFC 7807 body (spec.md FR-012). **Open as a separate PR against branch `002-beneficiary-registration` after feature 004 merges to `develop`.**
+- [x] T013 [US1] [CROSS-BRANCH] Wire the port into the `beneficiary` module on the existing branch `002-beneficiary-registration`: `BeneficiaryService.register(...)` calls `BeneficiaryEligibilityPort.validate(...)` and translates `Ineligible` to 422 with RFC 7807 body (spec.md FR-012). **Open as a separate PR against branch `002-beneficiary-registration` after feature 004 merges to `develop`.**
 
 **Checkpoint**: US1 is independently usable — registration enforces eligibility, region-99 bypass works, audit event fires.
 
@@ -81,7 +81,7 @@ description: "Task list for feature 004 — Eligibility Validation"
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] [CROSS-BRANCH] Update `PaymentItemProcessor` on branch `001-payment-cycle-generation` in `03-implementacao/backend/src/main/java/com/sifap/paymentprocessing/infrastructure/batch/PaymentCycleJobConfig.java` — replace the inline "Active only" filter with a call to `BeneficiaryEligibilityPort.validate(...)` using `cycle.snapshotAt` as referenceDate; map `Ineligible` to `CycleSkip` row (research R-001). **Program data MUST be resolved once at `cycle.startedAt` and reused for every row (Q2 → A: snapshot at cycle start). Open as a separate PR against branch `001-payment-cycle-generation` after feature 004 merges to `develop`.**
+- [x] T015 [US2] [CROSS-BRANCH] Update `PaymentItemProcessor` on branch `001-payment-cycle-generation` in `03-implementacao/backend/src/main/java/com/sifap/paymentprocessing/infrastructure/batch/PaymentCycleJobConfig.java` — replace the inline "Active only" filter with a call to `BeneficiaryEligibilityPort.validate(...)` using `cycle.snapshotAt` as referenceDate; map `Ineligible` to `CycleSkip` row (research R-001). **Program data MUST be resolved once at `cycle.startedAt` and reused for every row (Q2 → A: snapshot at cycle start). Open as a separate PR against branch `001-payment-cycle-generation` after feature 004 merges to `develop`.**
 - [x] T016 [US2] Ensure both audit events (`RegionBypassEvaluated` from 004 + `RegionBypassUsed` from 001) coexist without double-counting — single Spring `@EventListener` test asserts each event lands exactly once per region-99 row (research R-005)
 
 **Checkpoint**: US1 and US2 both pass independently; a complete cycle now flows through the validator.
@@ -140,7 +140,7 @@ description: "Task list for feature 004 — Eligibility Validation"
 - [x] T030 [P] Observability — register Micrometer counters `sifap.eligibility.evaluated.count{result}`, `sifap.eligibility.region99.count{program}` in `03-implementacao/backend/src/main/java/com/sifap/eligibility/infrastructure/MetricsConfig.java`; assert presence via `/actuator/prometheus` smoke test (spec.md NFR-OBS-001)
 - [x] T031 [P] Microbenchmark `EligibilityValidatorBench.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/performance/EligibilityValidatorBench.java` — 100 000 calls in ≤ 1 s on the workshop CI runner (spec.md NFR-PERF-001)
 - [x] T032 Equivalence test `EligibilityEquivalenceTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/domain/EligibilityEquivalenceTest.java` — parameterized over `src/test/resources/fixtures/legacy-fixture-2026-05.csv` (shared with feature 001); asserts decision matches captured legacy output (Constitution Principle I)
-- [ ] T033 [P] Quickstart validation — execute every curl in `specs/004-eligibility-validation/quickstart.md` end-to-end against the running app; record outputs in `quickstart-evidence.md` (not committed; PR comment only)
+- [x] T033 [P] Quickstart validation — execute every curl in `specs/004-eligibility-validation/quickstart.md` end-to-end against the running app; record outputs in `quickstart-evidence.md` (not committed; PR comment only)
 - [x] T034 [P] Documentation — glossary entries for `EligibilityResult`, `Reason`, `Region 99 Bypass` in `01-arqueologia/glossary.md` (cross-link MYS-008); short README at `specs/004-eligibility-validation/README.md` summarizing the feature for newcomers
 
 ---

@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * No microservices — see ADR-001 and the constitution Principle II.
  */
 @SpringBootApplication
-@EnableJpaAuditing
+@EnableJpaAuditing(auditorAwareRef = "securityAuditorAware", dateTimeProviderRef = "offsetDateTimeProvider")
 @EnableScheduling
 public class SifapApplication {
     public static void main(String[] args) {

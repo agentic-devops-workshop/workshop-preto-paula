@@ -1,11 +1,11 @@
 package com.sifap.eligibility.infrastructure;
 
 import com.sifap.eligibility.api.BeneficiaryEligibilityPort;
+import com.sifap.eligibility.api.EligibilityResult;
+import com.sifap.eligibility.api.Reason;
 import com.sifap.eligibility.application.ports.ProgramCriteriaPort;
 import com.sifap.eligibility.domain.EligibilityCriteria;
-import com.sifap.eligibility.domain.EligibilityResult;
 import com.sifap.eligibility.domain.EligibilityValidator;
-import com.sifap.eligibility.domain.Reason;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -39,13 +39,20 @@ public class DefaultEligibilityPortAdapter implements BeneficiaryEligibilityPort
     @Override
     public EligibilityResult validate(String programCode, LocalDate birthDate,
                                        BigDecimal familyIncome, int dependents, short regionCode) {
-        LocalDate referenceDate = LocalDate.now();
-        EligibilityResult prechecked = EligibilityValidator.validate(
+        return validate(programCode, birthDate, familyIncome, dependents, regionCode, LocalDate.now());
+    }
+
+    @Override
+    public EligibilityResult validate(String programCode, LocalDate birthDate,
+                                      BigDecimal familyIncome, int dependents,
+                                      short regionCode, LocalDate referenceDate) {
+        com.sifap.eligibility.domain.EligibilityResult domainPrechecked = EligibilityValidator.validate(
             null, birthDate, familyIncome, dependents, regionCode, referenceDate);
 
-        if (prechecked instanceof EligibilityResult.EligibleByBypass
-            || prechecked instanceof EligibilityResult.Ineligible ineligible
-                && ineligible.reason() == Reason.INVALID_INPUT) {
+        if (domainPrechecked instanceof com.sifap.eligibility.domain.EligibilityResult.EligibleByBypass
+            || domainPrechecked instanceof com.sifap.eligibility.domain.EligibilityResult.Ineligible ineligible
+                && ineligible.reason() == com.sifap.eligibility.domain.Reason.INVALID_INPUT) {
+            EligibilityResult prechecked = toApiResult(domainPrechecked);
             publishBypassEvent(programCode, prechecked);
             metrics.record(programCode, prechecked);
             return prechecked;
@@ -55,12 +62,23 @@ public class DefaultEligibilityPortAdapter implements BeneficiaryEligibilityPort
             ? null
             : criteriaPort.findByCode(programCode).orElse(null);
 
-        EligibilityResult result = EligibilityValidator.validate(
-            criteria, birthDate, familyIncome, dependents, regionCode, referenceDate);
+        EligibilityResult result = toApiResult(EligibilityValidator.validate(
+            criteria, birthDate, familyIncome, dependents, regionCode, referenceDate));
 
         publishBypassEvent(programCode, result);
         metrics.record(programCode, result);
         return result;
+    }
+
+    private static EligibilityResult toApiResult(com.sifap.eligibility.domain.EligibilityResult result) {
+        return switch (result) {
+            case com.sifap.eligibility.domain.EligibilityResult.Eligible ignored ->
+                new EligibilityResult.Eligible();
+            case com.sifap.eligibility.domain.EligibilityResult.EligibleByBypass bypass ->
+                new EligibilityResult.EligibleByBypass(bypass.regionCode());
+            case com.sifap.eligibility.domain.EligibilityResult.Ineligible ineligible ->
+                new EligibilityResult.Ineligible(Reason.valueOf(ineligible.reason().name()), ineligible.detail());
+        };
     }
 
     private void publishBypassEvent(String programCode, EligibilityResult result) {

@@ -96,6 +96,13 @@ curl http://localhost:8080/actuator/prometheus | grep sifap_eligibility
 # sifap_eligibility_region99_count_total{program="BFA1"} 1
 ```
 
+If the security chain is enabled locally, include any authenticated operator token:
+
+```bash
+curl -H 'Authorization: Bearer $OPR_TOKEN' \
+  http://localhost:8080/actuator/prometheus | grep sifap_eligibility
+```
+
 ## 7. Equivalence with legacy `VALELEG.NSN`
 
 When feature 001's fixture lands on `develop`, run:

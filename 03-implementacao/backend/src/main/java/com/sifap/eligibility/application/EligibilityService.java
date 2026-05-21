@@ -1,7 +1,7 @@
 package com.sifap.eligibility.application;
 
 import com.sifap.eligibility.api.BeneficiaryEligibilityPort;
-import com.sifap.eligibility.domain.EligibilityResult;
+import com.sifap.eligibility.api.EligibilityResult;
 import com.sifap.eligibility.interfaces.dto.Region99BeneficiaryDto;
 import com.sifap.eligibility.interfaces.dto.Region99ReportDto;
 import com.sifap.eligibility.interfaces.dto.SimulateRequest;
@@ -48,7 +48,7 @@ public class EligibilityService {
 
         List<Region99BeneficiaryDto> beneficiaries = cycleId != null
             ? reportByCycle(cycleId, revealCpf)
-            : reportByCompetence(competence, programCode, revealCpf);
+            : reportByCompetence(programCode, revealCpf);
 
         if (revealCpf) {
             beneficiaries.forEach(row -> events.publishEvent(new CpfRevealed(
@@ -75,17 +75,18 @@ public class EligibilityService {
     private List<Region99BeneficiaryDto> reportByCycle(Long cycleId, boolean revealCpf) {
         return jdbcOperations.query(
             """
-            select cpf, birth_date, last_update
-              from payment
-             where cycle_id = ?
-               and region_bypass = true
-             order by cpf
+                        select p.cpf, b.birth_date, p.generated_at as last_update
+                            from payment p
+                            join beneficiary b on b.id = p.beneficiary_id
+                         where p.cycle_id = ?
+                             and p.region_bypass = true
+                         order by p.cpf
              limit ?
             """,
             (rs, rowNum) -> Region99BeneficiaryDto.from(
                 rs.getString("cpf"),
                 calculateAge(rs.getObject("birth_date", LocalDate.class), LocalDate.now()),
-                rs.getObject("last_update", LocalDate.class),
+                                rs.getTimestamp("last_update").toLocalDateTime().toLocalDate(),
                 revealCpf
             ),
             cycleId,
@@ -93,10 +94,10 @@ public class EligibilityService {
         );
     }
 
-    private List<Region99BeneficiaryDto> reportByCompetence(String competence, String programCode, boolean revealCpf) {
+    private List<Region99BeneficiaryDto> reportByCompetence(String programCode, boolean revealCpf) {
         return jdbcOperations.query(
             """
-            select cpf, birth_date, last_update
+                        select cpf, birth_date, updated_at as last_update
               from beneficiary
              where region_code = 99
                and program_code = ?
@@ -106,7 +107,7 @@ public class EligibilityService {
             (rs, rowNum) -> Region99BeneficiaryDto.from(
                 rs.getString("cpf"),
                 calculateAge(rs.getObject("birth_date", LocalDate.class), LocalDate.now()),
-                rs.getObject("last_update", LocalDate.class),
+                rs.getTimestamp("last_update").toLocalDateTime().toLocalDate(),
                 revealCpf
             ),
             programCode,

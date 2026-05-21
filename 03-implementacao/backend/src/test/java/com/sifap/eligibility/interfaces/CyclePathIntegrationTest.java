@@ -2,7 +2,7 @@ package com.sifap.eligibility.interfaces;
 
 import com.sifap.eligibility.application.ports.ProgramCriteriaPort;
 import com.sifap.eligibility.domain.EligibilityCriteria;
-import com.sifap.eligibility.domain.EligibilityResult;
+import com.sifap.eligibility.api.EligibilityResult;
 import com.sifap.eligibility.infrastructure.DefaultEligibilityPortAdapter;
 import com.sifap.eligibility.infrastructure.MetricsConfig;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

@@ -2,7 +2,7 @@ package com.sifap.eligibility.interfaces;
 
 import com.sifap.eligibility.api.BeneficiaryEligibilityPort;
 import com.sifap.eligibility.application.EligibilityService;
-import com.sifap.eligibility.domain.EligibilityResult;
+import com.sifap.eligibility.api.EligibilityResult;
 import com.sifap.eligibility.infrastructure.config.SimulateRateLimiter;
 import com.sifap.eligibility.interfaces.dto.EligibilityResultDto;
 import com.sifap.eligibility.interfaces.dto.SimulateRequest;

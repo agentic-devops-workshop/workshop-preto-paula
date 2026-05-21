@@ -13,7 +13,7 @@ class EligibilityEquivalenceTest {
     private static final LocalDate REFERENCE_DATE = LocalDate.of(2026, 6, 1);
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/fixtures/legacy-fixture-2026-05.csv", numLinesToSkip = 1)
+    @CsvFileSource(resources = "/fixtures/eligibility-legacy-fixture-2026-05.csv", numLinesToSkip = 1)
     void validate_should_match_legacy_fixture(String programCode,
                                               char type,
                                               String incomeMax,

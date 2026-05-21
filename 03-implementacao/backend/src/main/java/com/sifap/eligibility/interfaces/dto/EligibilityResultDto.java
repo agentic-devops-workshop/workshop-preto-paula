@@ -1,7 +1,7 @@
 package com.sifap.eligibility.interfaces.dto;
 
-import com.sifap.eligibility.domain.EligibilityResult;
-import com.sifap.eligibility.domain.Reason;
+import com.sifap.eligibility.api.EligibilityResult;
+import com.sifap.eligibility.api.Reason;
 
 public record EligibilityResultDto(String outcome, Short regionCode, Reason reason, String detail) {
 

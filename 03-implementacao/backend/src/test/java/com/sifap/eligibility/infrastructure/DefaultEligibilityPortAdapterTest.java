@@ -2,8 +2,8 @@ package com.sifap.eligibility.infrastructure;
 
 import com.sifap.eligibility.application.ports.ProgramCriteriaPort;
 import com.sifap.eligibility.domain.EligibilityCriteria;
-import com.sifap.eligibility.domain.EligibilityResult;
-import com.sifap.eligibility.domain.Reason;
+import com.sifap.eligibility.api.EligibilityResult;
+import com.sifap.eligibility.api.Reason;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
@@ -61,5 +61,19 @@ class DefaultEligibilityPortAdapterTest {
         assertThat(((EligibilityResult.Ineligible) result).reason()).isEqualTo(Reason.INCOME_AND_NO_DEPENDENTS);
         verify(criteriaPort).findByCode("BFA1");
         assertThat(meterRegistry.counter("sifap.eligibility.evaluated.count", "result", "Ineligible").count()).isEqualTo(1.0);
+    }
+
+    @Test
+    void validate_should_honor_explicit_reference_date_for_batch_snapshot() {
+        when(criteriaPort.findByCode("BFP1")).thenReturn(Optional.of(
+            new EligibilityCriteria("BFP1", 'P', null, true, false)));
+
+        EligibilityResult beforeSixtiethBirthday = adapter.validate(
+            "BFP1", LocalDate.of(1966, 6, 2), BigDecimal.ZERO, 0, (short) 26, LocalDate.of(2026, 6, 1));
+        EligibilityResult onSixtiethBirthday = adapter.validate(
+            "BFP1", LocalDate.of(1966, 6, 2), BigDecimal.ZERO, 0, (short) 26, LocalDate.of(2026, 6, 2));
+
+        assertThat(((EligibilityResult.Ineligible) beforeSixtiethBirthday).reason()).isEqualTo(Reason.AGE_BELOW_60);
+        assertThat(onSixtiethBirthday).isInstanceOf(EligibilityResult.Eligible.class);
     }
 }

@@ -13,6 +13,15 @@ EligibilityResult validate(
     int dependents,
     short regionCode
 );
+
+default EligibilityResult validate(
+  String programCode,
+  LocalDate birthDate,
+  BigDecimal familyIncome,
+  int dependents,
+  short regionCode,
+  LocalDate referenceDate
+);
 ```
 
 ## Inputs
@@ -25,7 +34,7 @@ EligibilityResult validate(
 | `dependents` | yes | `>= 0`; otherwise `Ineligible(INVALID_INPUT)` |
 | `regionCode` | yes | `short`; `99` triggers bypass; any other value treated as a real region |
 
-The reference date is **not** a port parameter. Each caller chooses its own clock source (registration: today; cycle: `cycle.snapshotAt`) inside its own adapter wrapper. This keeps the port surface small and the validator pure (R-001).
+The five-argument method uses today's date for registration and simulate flows. The six-argument overload is for deterministic batch callers such as feature 001, which passes `cycle.snapshotAt` so an in-flight cycle does not drift when program data changes mid-run (CL-Q2).
 
 ## Outputs
 
