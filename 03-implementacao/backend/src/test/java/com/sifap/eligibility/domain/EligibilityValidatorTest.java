@@ -4,8 +4,12 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class EligibilityValidatorTest {
 
@@ -142,5 +146,42 @@ class EligibilityValidatorTest {
             typeA(new BigDecimal("600")), LocalDate.of(1990, 1, 1),
             new BigDecimal("-100"), 0, (short) 26, TODAY);
         assertThat(((EligibilityResult.Ineligible) r).reason()).isEqualTo(Reason.INVALID_INPUT);
+    }
+
+    @Test
+    void negative_dependents_returns_invalid_input_not_exception() {
+        EligibilityResult r = EligibilityValidator.validate(
+            typeA(new BigDecimal("600")), LocalDate.of(1990, 1, 1),
+            BigDecimal.ZERO, -1, (short) 26, TODAY);
+        assertThat(((EligibilityResult.Ineligible) r).reason()).isEqualTo(Reason.INVALID_INPUT);
+    }
+
+    @Test
+    void future_birth_date_returns_invalid_input_not_exception() {
+        EligibilityResult r = EligibilityValidator.validate(
+            typeA(new BigDecimal("600")), TODAY.plusDays(1),
+            BigDecimal.ZERO, 0, (short) 26, TODAY);
+        assertThat(((EligibilityResult.Ineligible) r).reason()).isEqualTo(Reason.INVALID_INPUT);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidRegions")
+    void unknown_region_returns_invalid_input_before_program_lookup(short regionCode) {
+        EligibilityResult r = EligibilityValidator.validate(
+            null, LocalDate.of(1990, 1, 1), BigDecimal.ZERO, 0, regionCode, TODAY);
+
+        assertThat(r).isInstanceOf(EligibilityResult.Ineligible.class);
+        EligibilityResult.Ineligible ineligible = (EligibilityResult.Ineligible) r;
+        assertThat(ineligible.reason()).isEqualTo(Reason.INVALID_INPUT);
+        assertThat(ineligible.detail()).contains("regionCode=" + regionCode);
+    }
+
+    private static Stream<Arguments> invalidRegions() {
+        return Stream.of(
+            Arguments.of((short) 0),
+            Arguments.of((short) 27),
+            Arguments.of((short) 50),
+            Arguments.of((short) 127)
+        );
     }
 }

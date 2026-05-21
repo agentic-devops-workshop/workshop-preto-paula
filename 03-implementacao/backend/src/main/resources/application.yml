@@ -57,6 +57,12 @@ sifap:
     region99:
       bypass:
         enabled: true   # BR-024 / MYS-008 preserved. SENARC ruling required to disable.
+  eligibility:
+    region99Bypass:
+      enabled: true   # BR-024 / MYS-008 preserved; prod guard fails closed when disabled with legacy rows.
+    simulate:
+      rateLimit:
+        perMinute: 30   # CL-Q3: per authenticated JWT sub, not per IP.
 
 logging:
   pattern:

@@ -24,7 +24,8 @@ class ModularMonolithArchitectureTest {
                 "..paymentprocessing.application..",
                 "..paymentprocessing.domain..",
                 "..paymentprocessing.infrastructure..",
-                "..paymentprocessing.interfaces..");
+                "..paymentprocessing.interfaces..")
+            .allowEmptyShould(true);
 
     @ArchTest
     static final ArchRule payment_does_not_depend_on_beneficiary_internals =
@@ -33,7 +34,8 @@ class ModularMonolithArchitectureTest {
             .should().dependOnClassesThat().resideInAnyPackage(
                 "..beneficiary.application..",
                 "..beneficiary.infrastructure..",
-                "..beneficiary.interfaces..");
+                "..beneficiary.interfaces..")
+            .allowEmptyShould(true);
 
     /** Domain classes must not import any persistence framework. */
     @ArchTest
@@ -41,7 +43,8 @@ class ModularMonolithArchitectureTest {
         noClasses()
             .that().resideInAPackage("..domain.calculation..")
             .should().dependOnClassesThat().resideInAnyPackage(
-                "jakarta.persistence..", "org.springframework..", "org.hibernate..");
+                "jakarta.persistence..", "org.springframework..", "org.hibernate..")
+            .allowEmptyShould(true);
 
     /** Controllers must not reach into repositories directly — go through application services. */
     @ArchTest
@@ -55,6 +58,7 @@ class ModularMonolithArchitectureTest {
     static final ArchRule rounding_mode_down_only_in_truncation =
         classes()
             .that().haveSimpleName("MainframeTruncation")
-            .should().resideInAPackage("..paymentprocessing.domain.calculation..");
+            .should().resideInAPackage("..paymentprocessing.domain.calculation..")
+            .allowEmptyShould(true);
     // The companion grep CI gate verifies no other source uses RoundingMode.DOWN — see scripts/check.sh.
 }

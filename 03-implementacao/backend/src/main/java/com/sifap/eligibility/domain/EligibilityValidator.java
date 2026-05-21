@@ -18,6 +18,8 @@ import java.time.Period;
 public final class EligibilityValidator {
 
     private static final short REGION_BYPASS = 99;
+    private static final short MIN_STANDARD_REGION = 1;
+    private static final short MAX_STANDARD_REGION = 26;
 
     private EligibilityValidator() {}
 
@@ -34,6 +36,14 @@ public final class EligibilityValidator {
         }
         if (familyIncome.signum() < 0 || dependents < 0) {
             return new EligibilityResult.Ineligible(Reason.INVALID_INPUT, "negative income or dependents");
+        }
+        if (birthDate.isAfter(referenceDate)) {
+            return new EligibilityResult.Ineligible(Reason.INVALID_INPUT, "birthDate after referenceDate");
+        }
+        if (!isAcceptedRegion(regionCode)) {
+            return new EligibilityResult.Ineligible(
+                Reason.INVALID_INPUT,
+                "regionCode=%d out of accepted range".formatted(regionCode));
         }
 
         // BR-024 / MYS-008 — region 99 wins. Documented bypass with audit on the calling side (FR-006).
@@ -55,6 +65,11 @@ public final class EligibilityValidator {
             case 'T' -> evaluateTypeT(age);
             default  -> new EligibilityResult.Ineligible(Reason.INVALID_INPUT, "unknown type " + criteria.type());
         };
+    }
+
+    private static boolean isAcceptedRegion(short regionCode) {
+        return regionCode == REGION_BYPASS
+            || (regionCode >= MIN_STANDARD_REGION && regionCode <= MAX_STANDARD_REGION);
     }
 
     /** BR-025: type A. Eligible IFF income ≤ max OR dependents ≥ 1. */

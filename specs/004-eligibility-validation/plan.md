@@ -1,133 +1,107 @@
 # Implementation Plan: Eligibility Validation
 
-**Feature**: `004-eligibility-validation` · **Spec**: [`spec.md`](spec.md)
-**Status**: Draft · 2026-05-20
+**Branch**: `004-eligibility-validation` | **Date**: 2026-05-20 | **Spec**: [spec.md](spec.md)
 
-## 1. Module Layout
+**Input**: Feature specification from `/specs/004-eligibility-validation/spec.md`
+
+## Summary
+
+Replace the legacy `VALELEG.NSN` eligibility validator with a pure, testable rule engine that (a) enforces the three program-type rules (A income+dependents per BR-025, P age ≥ 60 per BR-026, T age 16–65 per BR-027), (b) preserves the region-99 bypass (BR-024 / MYS-008) under explicit audit, (c) refuses to start in production when the bypass is disabled but legacy region-99 rows still exist, and (d) exposes a published port `BeneficiaryEligibilityPort` consumed by features 002 (Beneficiary Registration) and 001 (Payment Cycle). Single in-process module within the modular monolith.
+
+## Technical Context
+
+**Language/Version**: Java 21 LTS (Constitution Principle IV)
+
+**Primary Dependencies**: Spring Boot 3.3, Spring Web, Spring Data JPA (read-only access for the region-99 startup probe — the validator itself is dependency-free), Jakarta Validation, Micrometer, springdoc-openapi
+
+**Storage**: PostgreSQL 16 (read-only against existing `beneficiary` and `social_program` tables owned by features 002 and 003; no new tables in this feature)
+
+**Testing**: JUnit 5, AssertJ, jqwik (property-based tests), ArchUnit, RestAssured, Spring `@SpringBootTest` for boot-guard integration
+
+**Target Platform**: Linux container on AKS (this feature is a package inside the modular monolith, not a separate deployable)
+
+**Project Type**: Web application — Java backend; the operator UI for the region-99 report ships in feature 011
+
+**Performance Goals**: P95 ≤ 5 ms per `validate()` call; ≥ 100 000 validations/sec sustained (covers 4.2 M-row cycle within the 70-minute budget set by 001 NFR-PERF-001); region-99 report query P95 ≤ 1 s per cycle
+
+**Constraints**: Pure function (no per-call DB round-trip); cross-context access only via published `api/` package (ArchUnit-enforced); region-99 short-circuit preserved exactly; **NEEDS CLARIFICATION** — snapshot semantics across program updates mid-cycle (open clarification Q2 from `/speckit.clarify`)
+
+**Scale/Scope**: ~30 active programs × 4.2 M beneficiaries = ~4.2 M validations per monthly cycle, plus ~10 k/day from registrations and ~1 k/day from the simulate UX path
+
+## Constitution Check
+
+*GATE: Must pass before Phase 0 research. Re-checked after Phase 1 design.*
+
+| Principle | Status | Evidence |
+|---|---|---|
+| I — Legacy Traceability (NON-NEGOTIABLE) | ✅ PASS | All 12 FRs cite `VALELEG.NSN` line ranges or `[GREENFIELD]` with one-line justification |
+| II — Modular Monolith (NON-NEGOTIABLE) | ✅ PASS | Single Spring Boot package `com.sifap.eligibility`; cross-context contact only via `api/BeneficiaryEligibilityPort` and `application/ports/ProgramCriteriaPort` — ArchUnit gate in tasks.md T011 |
+| III — Test-First (NON-NEGOTIABLE) | ✅ PASS | Tasks T002 (validator unit, 100% coverage), T003 (property tests), T004 (port contract), T008 (boot guard), T012 (microbenchmark) all written alongside implementation; equivalence fixture format mirrors feature 001 |
+| IV — Stack Discipline | ✅ PASS | Java 21 + Spring Boot 3.3 + Micrometer + ArchUnit — all already declared in `pom.xml`. No new dependencies. |
+| V — Single Source of Truth | ✅ PASS | `EligibilityValidator` is the only encoder of BR-024..BR-027; spec/plan/tasks link to constitution and `business-rules-catalog.md` instead of duplicating |
+| VI — Security & Compliance by Construction | ✅ PASS | NFR-SEC-001/002, FR-006 (audit on bypass), FR-007 (boot guard); CPF mask via ADR-007; no new secrets |
+| VII — Observability and Operational Honesty | ✅ PASS | NFR-OBS-001 counters `sifap.eligibility.*`, NFR-OBS-002 anomaly alert; correlation-ID propagation inherited from `GlobalExceptionHandler` |
+
+**Verdict**: PASS. No principle violated; complexity tracking table left empty by design.
+
+**Re-check after Phase 1**: ✅ PASS (no new dependencies introduced; data model is read-only against tables owned by 002 and 003).
+
+## Project Structure
+
+### Documentation (this feature)
 
 ```text
-com.sifap.eligibility/
-├── domain/
-│   ├── EligibilityResult.java          ← sealed interface: Eligible | EligibleByBypass | Ineligible
-│   ├── Reason.java                     ← enum (FR-011)
-│   ├── EligibilityCriteria.java        ← record fed by SocialProgramRegistry
-│   └── EligibilityValidator.java       ← pure function, the heart
-├── application/
-│   ├── EligibilityService.java         ← simulate, region-99 report aggregation
-│   └── ports/
-│       └── ProgramCriteriaPort.java    ← read-only port to SocialProgramRegistry
-├── infrastructure/
-│   ├── SpringEventAuditPublisher.java  ← publishes RegionBypassEvaluated
-│   └── config/
-│       └── Region99StartupGuard.java   ← FR-007 startup check
-├── interfaces/
-│   ├── EligibilityController.java      ← /simulate, /region-99-report
-│   ├── EligibilityExceptionHandler.java
-│   └── dto/...
-└── api/
-    └── BeneficiaryEligibilityPort.java ← PUBLISHED — consumed by 001 and 002
+specs/004-eligibility-validation/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+│   ├── eligibility-port.contract.md
+│   └── eligibility-api.openapi.yaml
+├── spec.md
+└── tasks.md
 ```
 
-The aggregate's heart is `EligibilityValidator.validate(criteria, candidate)` — a 25-line pure function.
+### Source Code (repository root)
 
-## 2. Domain Model
+The workshop uses **Option 2 — Web application** structure, with the Java backend under `03-implementacao/backend/`. This feature contributes a single package under `com.sifap.eligibility`:
 
-```java
-public sealed interface EligibilityResult
-    permits EligibilityResult.Eligible, EligibilityResult.EligibleByBypass, EligibilityResult.Ineligible {
-
-    record Eligible() implements EligibilityResult {}
-    record EligibleByBypass(short regionCode) implements EligibilityResult {}
-    record Ineligible(Reason reason, String detail) implements EligibilityResult {}
-
-    default boolean isEligible() { return !(this instanceof Ineligible); }
-    default boolean isBypass()   { return this instanceof EligibleByBypass; }
-}
+```text
+03-implementacao/backend/
+├── src/main/java/com/sifap/eligibility/
+│   ├── domain/
+│   │   ├── EligibilityValidator.java
+│   │   ├── EligibilityResult.java
+│   │   ├── EligibilityCriteria.java
+│   │   └── Reason.java
+│   ├── application/
+│   │   ├── EligibilityService.java
+│   │   └── ports/
+│   │       └── ProgramCriteriaPort.java
+│   ├── infrastructure/
+│   │   ├── DefaultEligibilityPortAdapter.java
+│   │   └── config/
+│   │       └── Region99StartupGuard.java
+│   ├── interfaces/
+│   │   ├── EligibilityController.java
+│   │   ├── EligibilityExceptionHandler.java
+│   │   └── dto/...
+│   └── api/
+│       └── BeneficiaryEligibilityPort.java
+└── src/test/java/com/sifap/eligibility/
+    ├── domain/EligibilityValidatorTest.java
+    ├── domain/EligibilityValidatorPropertyTest.java
+    ├── interfaces/EligibilityControllerTest.java
+    └── architecture/EligibilityArchitectureTest.java
 ```
 
-`EligibilityValidator.validate` short-circuits on `regionCode == 99` (FR-005), then dispatches on program type.
+**Structure Decision**: Option 2 (Web application). This feature is a single package inside the existing monolith — no new project, no new repository. The operator UI for the region-99 report ships in feature 011 and consumes the REST endpoints from this feature over HTTP.
 
-## 3. Published Port
+## Complexity Tracking
 
-```java
-public interface BeneficiaryEligibilityPort {
-    EligibilityResult validate(String programCode, LocalDate birthDate,
-                               BigDecimal familyIncome, int dependents, short regionCode);
-}
-```
+No constitution violations identified. Table intentionally left empty.
 
-## 4. Integration with Other Features
-
-| Caller | When | Consequence on `Ineligible` |
-|---|---|---|
-| **002 BeneficiaryRegistration** | On `POST /beneficiaries` | Block registration with `422 Unprocessable Entity` + structured reason. |
-| **001 PaymentCycle** | Per row in the processor | Skip the row, write to `cycle_skip` with reason. |
-| **004 itself** | `/simulate` endpoint | Return result without persisting. |
-
-Audit:
-
-- `Eligible` → no event (high volume; covered by cycle-level metric).
-- `EligibleByBypass` → `RegionBypassEvaluated` event at WARN (FR-006).
-- `Ineligible` → no event from this module; the caller (registration or cycle) decides whether to audit at its level.
-
-## 5. Region-99 Report (FR-008)
-
-`GET /api/v1/eligibility/region-99-report?cycleId={id}` returns:
-
-```json
-{
-  "cycleId": 42,
-  "competence": "2026-06",
-  "programCode": "BFA1",
-  "totalBeneficiaries": 1247,
-  "region99Count": 18,
-  "region99Percent": 1.44,
-  "beneficiaries": [
-    { "maskedCpf": "XXX.XXX.XXX-09", "ageAtRun": 47, "lastUpdate": "2014-03-12" },
-    ...
-  ]
-}
-```
-
-CPF is masked by default; `revealCpf=true` requires `ADM` or `AUD` role and emits one audit event per row revealed.
-
-## 6. Startup Guard (FR-007)
-
-```java
-@Configuration
-@Profile("prod")
-class Region99StartupGuard {
-    @PostConstruct
-    void enforce(DataSource ds, @Value("${sifap.eligibility.region99Bypass.enabled:true}") boolean bypassEnabled) {
-        if (!bypassEnabled) {
-            long n = countRegion99Beneficiaries(ds);
-            if (n > 0) throw new IllegalStateException(
-                "FATAL: region-99 bypass is disabled but " + n + " beneficiaries still carry regionCode=99. " +
-                "Migrate those records before disabling the bypass. See FR-007.");
-        }
-    }
-}
-```
-
-## 7. Test Strategy
-
-| Layer | Coverage |
-|---|---|
-| Validator unit | **100%**, including all reason branches and boundary ages (16, 18, 60, 65) and income thresholds |
-| Validator property test | random inputs assert: never returns Eligible when income > max AND dependents = 0 AND type = A AND regionCode ≠ 99 |
-| Region-99 bypass test | dedicated test asserting bypass overrides all rules |
-| Service integration | Testcontainers + mocked ProgramCriteriaPort |
-| API (RestAssured) | `/simulate` + `/region-99-report` + RBAC matrix |
-| ArchUnit | only `api/BeneficiaryEligibilityPort` may be imported by other modules |
-| Boot guard | `@SpringBootTest(profiles=prod, props=bypassEnabled=false)` + seeded region-99 row MUST fail to start |
-| Performance | microbenchmark: 100k `validate` calls in ≤ 1s (≤ 10 µs each) |
-
-## 8. Constitution Compliance
-
-- I (Legacy Traceability): every FR cites `VALELEG.NSN` or `[GREENFIELD]`
-- II (Modular Monolith): module is a sibling of SocialProgramRegistry; reads through `ProgramCriteriaPort`
-- III (Test-First): tests cover boundaries before implementation
-- IV (Stack Discipline): no new dependencies
-- V (Single Source of Truth): age formula lives only in `EligibilityValidator` (matches the legacy BR-005 imprecision until Phase 2)
-- VI (Security & Compliance): RBAC on reveal-CPF and reports; immutable audit on bypass
-- VII (Observability): counters per result type, per program; bypass anomaly alert
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| — | — | — |

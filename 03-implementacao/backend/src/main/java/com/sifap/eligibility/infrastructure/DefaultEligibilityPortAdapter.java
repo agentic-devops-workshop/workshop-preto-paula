@@ -5,6 +5,7 @@ import com.sifap.eligibility.application.ports.ProgramCriteriaPort;
 import com.sifap.eligibility.domain.EligibilityCriteria;
 import com.sifap.eligibility.domain.EligibilityResult;
 import com.sifap.eligibility.domain.EligibilityValidator;
+import com.sifap.eligibility.domain.Reason;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,19 +36,34 @@ public class DefaultEligibilityPortAdapter implements BeneficiaryEligibilityPort
     @Override
     public EligibilityResult validate(String programCode, LocalDate birthDate,
                                        BigDecimal familyIncome, int dependents, short regionCode) {
+        LocalDate referenceDate = LocalDate.now();
+        EligibilityResult prechecked = EligibilityValidator.validate(
+            null, birthDate, familyIncome, dependents, regionCode, referenceDate);
+
+        if (prechecked instanceof EligibilityResult.EligibleByBypass
+            || prechecked instanceof EligibilityResult.Ineligible ineligible
+                && ineligible.reason() == Reason.INVALID_INPUT) {
+            publishBypassEvent(programCode, prechecked);
+            return prechecked;
+        }
+
         EligibilityCriteria criteria = (programCode == null)
             ? null
             : criteriaPort.findByCode(programCode).orElse(null);
 
         EligibilityResult result = EligibilityValidator.validate(
-            criteria, birthDate, familyIncome, dependents, regionCode, LocalDate.now());
+            criteria, birthDate, familyIncome, dependents, regionCode, referenceDate);
 
+        publishBypassEvent(programCode, result);
+        return result;
+    }
+
+    private void publishBypassEvent(String programCode, EligibilityResult result) {
         if (result instanceof EligibilityResult.EligibleByBypass bypass) {
             log.warn("Region-99 bypass evaluated. program={} regionCode={}", programCode, bypass.regionCode());
             events.publishEvent(new RegionBypassEvaluated(
                 programCode, bypass.regionCode(), OffsetDateTime.now()));
         }
-        return result;
     }
 
     /** Domain event published whenever the region-99 bypass is triggered (FR-006). */

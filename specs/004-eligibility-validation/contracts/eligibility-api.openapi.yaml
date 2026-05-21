@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: SIFAP 2.0 — Eligibility API
+  version: 1.0.0
+  description: |
+    Operator-facing REST surface of the Eligibility Validation module.
+    The simulate endpoint is meant for the registration UI; the
+    region-99 report is for SENARC oversight.
+servers:
+  - url: https://api.sifap.gov.br/v1
+    description: Production
+  - url: https://api.uat.sifap.gov.br/v1
+    description: UAT
+security:
+  - bearerAuth: []
+paths:
+  /eligibility/simulate:
+    post:
+      operationId: simulateEligibility
+      summary: Pre-validate a candidate (no persistence)
+      tags: [Eligibility]
+      security:
+        - bearerAuth: [OPR, ADM, AUD, CON]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SimulateRequest' }
+      responses:
+        '200':
+          description: Validation outcome
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EligibilityResultDto' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /eligibility/region-99-report:
+    get:
+      operationId: region99Report
+      summary: List beneficiaries who used the region-99 bypass
+      tags: [Eligibility]
+      security:
+        - bearerAuth: [ADM, AUD]
+      parameters:
+        - in: query
+          name: cycleId
+          schema: { type: integer, format: int64 }
+          description: Either cycleId OR (competence + programCode) is required.
+        - in: query
+          name: competence
+          schema: { type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' }
+        - in: query
+          name: programCode
+          schema: { type: string, pattern: '[A-Z0-9]{4}' }
+        - in: query
+          name: revealCpf
+          schema: { type: boolean, default: false }
+          description: When true, requires AUD role and emits one audit event per row.
+      responses:
+        '200':
+          description: Report
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Region99Report' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: Validation error (RFC 7807)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: Token lacks required role
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    SimulateRequest:
+      type: object
+      required: [programCode, birthDate, familyIncome, dependents, regionCode]
+      properties:
+        programCode:  { type: string, pattern: '[A-Z0-9]{4}' }
+        birthDate:    { type: string, format: date }
+        familyIncome: { type: number, minimum: 0 }
+        dependents:   { type: integer, minimum: 0 }
+        regionCode:   { type: integer, minimum: 0, maximum: 999 }
+    EligibilityResultDto:
+      type: object
+      required: [outcome]
+      properties:
+        outcome:
+          type: string
+          enum: [Eligible, EligibleByBypass, Ineligible]
+        regionCode:
+          type: integer
+          nullable: true
+          description: Present only when outcome = EligibleByBypass (always 99).
+        reason:
+          type: string
+          nullable: true
+          enum:
+            - INCOME_AND_NO_DEPENDENTS
+            - AGE_BELOW_60
+            - AGE_BELOW_16
+            - AGE_ABOVE_65
+            - PROGRAM_NOT_FOUND
+            - PROGRAM_RETIRED
+            - INVALID_INPUT
+        detail:
+          type: string
+          nullable: true
+    Region99Report:
+      type: object
+      properties:
+        cycleId:        { type: integer, format: int64, nullable: true }
+        competence:     { type: string, nullable: true }
+        programCode:    { type: string, nullable: true }
+        totalBeneficiaries: { type: integer }
+        region99Count:      { type: integer }
+        region99Percent:    { type: number }
+        beneficiaries:
+          type: array
+          items:
+            type: object
+            properties:
+              maskedCpf:  { type: string, description: 'XXX.XXX.XXX-NN unless revealCpf=true' }
+              ageAtRun:   { type: integer }
+              lastUpdate: { type: string, format: date }
+    Problem:
+      type: object
+      properties:
+        type:     { type: string, format: uri }
+        title:    { type: string }
+        status:   { type: integer }
+        code:     { type: string }
+        detail:   { type: string }
+        correlationId: { type: string, format: uuid }

@@ -102,3 +102,7 @@ Full guide: [09-cheat-sheets/copilot-3-modes.md](../09-cheat-sheets/copilot-3-mo
 <!-- For per-language conventions, see .github/instructions/*.instructions.md (auto-applied) -->
 <!-- For stage workflows, select the matching stage agent in Copilot Chat -->
 <!-- Repo memory: /memories/repo/workshop-preto-paula.md tracks current project state -->
+
+<!-- SPECKIT START -->
+**Active feature plan**: [`specs/004-eligibility-validation/plan.md`](../specs/004-eligibility-validation/plan.md)
+<!-- SPECKIT END -->
