@@ -6,7 +6,7 @@ import com.sifap.eligibility.interfaces.dto.Region99BeneficiaryDto;
 import com.sifap.eligibility.interfaces.dto.Region99ReportDto;
 import com.sifap.eligibility.interfaces.dto.SimulateRequest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,14 +19,14 @@ public class EligibilityService {
     private static final int DEFAULT_LIMIT = 1_000;
 
     private final BeneficiaryEligibilityPort eligibilityPort;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcOperations jdbcOperations;
     private final ApplicationEventPublisher events;
 
     public EligibilityService(BeneficiaryEligibilityPort eligibilityPort,
-                              JdbcTemplate jdbcTemplate,
+                              JdbcOperations jdbcOperations,
                               ApplicationEventPublisher events) {
         this.eligibilityPort = eligibilityPort;
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcOperations = jdbcOperations;
         this.events = events;
     }
 
@@ -73,7 +73,7 @@ public class EligibilityService {
     }
 
     private List<Region99BeneficiaryDto> reportByCycle(Long cycleId, boolean revealCpf) {
-        return jdbcTemplate.query(
+        return jdbcOperations.query(
             """
             select cpf, birth_date, last_update
               from payment
@@ -94,7 +94,7 @@ public class EligibilityService {
     }
 
     private List<Region99BeneficiaryDto> reportByCompetence(String competence, String programCode, boolean revealCpf) {
-        return jdbcTemplate.query(
+        return jdbcOperations.query(
             """
             select cpf, birth_date, last_update
               from beneficiary

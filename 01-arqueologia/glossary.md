@@ -85,6 +85,9 @@ Prompt útil no Copilot Chat (cole o conteúdo de 2–3 arquivos `.NSN` no chat 
 | 42 | `JES2` | Job Entry Subsystem 2 | `legacy-docs/*` | Subsistema z/OS para execução de jobs batch. |
 | 43 | `CICS` | Customer Information Control System | `legacy-docs/*` | TP Monitor da IBM. Usado apenas para integração de consulta CPF. |
 | 44 | `MAP` | Tela 3270 (input/output Natural) | `CONSBENF.NSN` | Layout de tela de terminal mainframe. CONSBENF usa MAP `CONSBENF-M01`. |
+| 45 | `EligibilityResult` | Resultado moderno da elegibilidade | `VALELEG.NSN` / `specs/004-eligibility-validation` | União fechada: `Eligible`, `EligibleByBypass` ou `Ineligible(reason, detail)`. Preserva BR-024 a BR-027 com saída estruturada. |
+| 46 | `Reason` | Motivo de inelegibilidade | `VALELEG.NSN` / `specs/004-eligibility-validation` | Enum estável para decisões negativas: renda/dependentes, idade, programa inexistente/retirado ou entrada inválida. |
+| 47 | `Region 99 Bypass` | Atalho de elegibilidade por região 99 | `VALELEG.NSN#L106-L110`, MYS-008 | Regra BR-024: `COD-REGIAO = 99` pula critérios de elegibilidade. No moderno vira `EligibleByBypass(99)` com auditoria WARN. |
 
 ## Observações
 

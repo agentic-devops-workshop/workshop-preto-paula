@@ -26,11 +26,14 @@ public class DefaultEligibilityPortAdapter implements BeneficiaryEligibilityPort
 
     private final ProgramCriteriaPort criteriaPort;
     private final ApplicationEventPublisher events;
+    private final MetricsConfig.EligibilityMetrics metrics;
 
     public DefaultEligibilityPortAdapter(ProgramCriteriaPort criteriaPort,
-                                         ApplicationEventPublisher events) {
+                                         ApplicationEventPublisher events,
+                                         MetricsConfig.EligibilityMetrics metrics) {
         this.criteriaPort = criteriaPort;
         this.events       = events;
+        this.metrics = metrics;
     }
 
     @Override
@@ -44,6 +47,7 @@ public class DefaultEligibilityPortAdapter implements BeneficiaryEligibilityPort
             || prechecked instanceof EligibilityResult.Ineligible ineligible
                 && ineligible.reason() == Reason.INVALID_INPUT) {
             publishBypassEvent(programCode, prechecked);
+            metrics.record(programCode, prechecked);
             return prechecked;
         }
 
@@ -55,14 +59,15 @@ public class DefaultEligibilityPortAdapter implements BeneficiaryEligibilityPort
             criteria, birthDate, familyIncome, dependents, regionCode, referenceDate);
 
         publishBypassEvent(programCode, result);
+        metrics.record(programCode, result);
         return result;
     }
 
     private void publishBypassEvent(String programCode, EligibilityResult result) {
-        if (result instanceof EligibilityResult.EligibleByBypass bypass) {
-            log.warn("Region-99 bypass evaluated. program={} regionCode={}", programCode, bypass.regionCode());
+        if (result instanceof EligibilityResult.EligibleByBypass(short bypassRegionCode)) {
+            log.warn("Region-99 bypass evaluated. program={} regionCode={}", programCode, bypassRegionCode);
             events.publishEvent(new RegionBypassEvaluated(
-                programCode, bypass.regionCode(), OffsetDateTime.now()));
+                programCode, bypassRegionCode, OffsetDateTime.now()));
         }
     }
 

@@ -4,6 +4,7 @@ import com.sifap.eligibility.application.ports.ProgramCriteriaPort;
 import com.sifap.eligibility.domain.EligibilityCriteria;
 import com.sifap.eligibility.domain.EligibilityResult;
 import com.sifap.eligibility.domain.Reason;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -22,7 +23,9 @@ class DefaultEligibilityPortAdapterTest {
 
     private final ProgramCriteriaPort criteriaPort = mock(ProgramCriteriaPort.class);
     private final ApplicationEventPublisher events = mock(ApplicationEventPublisher.class);
-    private final DefaultEligibilityPortAdapter adapter = new DefaultEligibilityPortAdapter(criteriaPort, events);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
+    private final MetricsConfig.EligibilityMetrics metrics = new MetricsConfig.EligibilityMetrics(meterRegistry);
+    private final DefaultEligibilityPortAdapter adapter = new DefaultEligibilityPortAdapter(criteriaPort, events, metrics);
 
     @Test
     void validate_should_publish_bypass_event_without_program_lookup_when_region_is_99() {
@@ -32,6 +35,7 @@ class DefaultEligibilityPortAdapterTest {
         assertThat(result).isInstanceOf(EligibilityResult.EligibleByBypass.class);
         verify(criteriaPort, never()).findByCode(any());
         verify(events).publishEvent(any(DefaultEligibilityPortAdapter.RegionBypassEvaluated.class));
+        assertThat(meterRegistry.counter("sifap.eligibility.region99.count", "program", "BFA1").count()).isEqualTo(1.0);
     }
 
     @Test
@@ -56,5 +60,6 @@ class DefaultEligibilityPortAdapterTest {
         assertThat(result).isInstanceOf(EligibilityResult.Ineligible.class);
         assertThat(((EligibilityResult.Ineligible) result).reason()).isEqualTo(Reason.INCOME_AND_NO_DEPENDENTS);
         verify(criteriaPort).findByCode("BFA1");
+        assertThat(meterRegistry.counter("sifap.eligibility.evaluated.count", "result", "Ineligible").count()).isEqualTo(1.0);
     }
 }

@@ -3,6 +3,8 @@ package com.sifap.eligibility.interfaces;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,6 +22,16 @@ public class EligibilityExceptionHandler {
     @ExceptionHandler(EligibilityController.RateLimitExceededException.class)
     public ResponseEntity<ProblemDetail> handleRateLimit(EligibilityController.RateLimitExceededException ex) {
         return problem(HttpStatus.TOO_MANY_REQUESTS, "ELIGIBILITY_RATE_LIMITED", ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleUnauthenticated(AuthenticationCredentialsNotFoundException ex) {
+        return problem(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ProblemDetail> handleForbidden(AccessDeniedException ex) {
+        return problem(HttpStatus.FORBIDDEN, "ACCESS_DENIED", ex.getMessage());
     }
 
     private static ResponseEntity<ProblemDetail> problem(HttpStatus status, String code, String detail) {

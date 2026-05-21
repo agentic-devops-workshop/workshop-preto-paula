@@ -1,0 +1,9 @@
+program_code,type,income_max,birth_date,family_income,dependents,region_code,expected_outcome,expected_reason
+BFA1,A,600.00,1990-01-01,550.00,0,26,Eligible,
+BFA1,A,600.00,1990-01-01,900.00,0,26,Ineligible,INCOME_AND_NO_DEPENDENTS
+BFA1,A,600.00,1990-01-01,900.00,2,26,Eligible,
+BFP1,P,,1966-06-01,0.00,0,26,Eligible,
+BFP1,P,,1967-06-01,0.00,0,26,Ineligible,AGE_BELOW_60
+BFT1,T,,2010-06-01,0.00,0,26,Eligible,
+BFT1,T,,1960-06-01,0.00,0,26,Ineligible,AGE_ABOVE_65
+BFT1,T,,1990-01-01,0.00,0,99,EligibleByBypass,

@@ -77,12 +77,12 @@ description: "Task list for feature 004 — Eligibility Validation"
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Integration test in `03-implementacao/backend/src/test/java/com/sifap/eligibility/interfaces/CyclePathIntegrationTest.java` — Spring `@SpringBootTest` + Testcontainers; runs a 10-row cycle with mocked `ProgramCriteriaPort`; asserts the skip + bypass counts (spec.md US2 Acceptance Scenarios 1–2)
+- [x] T014 [P] [US2] Integration test in `03-implementacao/backend/src/test/java/com/sifap/eligibility/interfaces/CyclePathIntegrationTest.java` — Spring `@SpringBootTest` + Testcontainers; runs a 10-row cycle with mocked `ProgramCriteriaPort`; asserts the skip + bypass counts (spec.md US2 Acceptance Scenarios 1–2)
 
 ### Implementation for User Story 2
 
 - [ ] T015 [US2] [CROSS-BRANCH] Update `PaymentItemProcessor` on branch `001-payment-cycle-generation` in `03-implementacao/backend/src/main/java/com/sifap/paymentprocessing/infrastructure/batch/PaymentCycleJobConfig.java` — replace the inline "Active only" filter with a call to `BeneficiaryEligibilityPort.validate(...)` using `cycle.snapshotAt` as referenceDate; map `Ineligible` to `CycleSkip` row (research R-001). **Program data MUST be resolved once at `cycle.startedAt` and reused for every row (Q2 → A: snapshot at cycle start). Open as a separate PR against branch `001-payment-cycle-generation` after feature 004 merges to `develop`.**
-- [ ] T016 [US2] Ensure both audit events (`RegionBypassEvaluated` from 004 + `RegionBypassUsed` from 001) coexist without double-counting — single Spring `@EventListener` test asserts each event lands exactly once per region-99 row (research R-005)
+- [x] T016 [US2] Ensure both audit events (`RegionBypassEvaluated` from 004 + `RegionBypassUsed` from 001) coexist without double-counting — single Spring `@EventListener` test asserts each event lands exactly once per region-99 row (research R-005)
 
 **Checkpoint**: US1 and US2 both pass independently; a complete cycle now flows through the validator.
 
@@ -96,8 +96,8 @@ description: "Task list for feature 004 — Eligibility Validation"
 
 ### Tests for User Story 3
 
-- [ ] T017 [P] [US3] Controller test `EligibilityControllerTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/interfaces/EligibilityControllerTest.java` — RestAssured covers 200 with mask + 200 reveal flow + 403 without `AUD` + 400 missing params (spec.md US3 + contracts/eligibility-api.openapi.yaml)
-- [ ] T018 [P] [US3] Service test `EligibilityServiceTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/application/EligibilityServiceTest.java` — aggregation pulls `payment.region_bypass = true` rows (research R-008) with mocked repository
+- [x] T017 [P] [US3] Controller test `EligibilityControllerTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/interfaces/EligibilityControllerTest.java` — RestAssured covers 200 with mask + 200 reveal flow + 403 without `AUD` + 400 missing params (spec.md US3 + contracts/eligibility-api.openapi.yaml)
+- [x] T018 [P] [US3] Service test `EligibilityServiceTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/application/EligibilityServiceTest.java` — aggregation pulls `payment.region_bypass = true` rows (research R-008) with mocked repository
 
 ### Implementation for User Story 3
 
@@ -118,13 +118,13 @@ description: "Task list for feature 004 — Eligibility Validation"
 
 ### Tests for User Story 4
 
-- [ ] T023 [P] [US4] Controller test in `03-implementacao/backend/src/test/java/com/sifap/eligibility/interfaces/SimulateControllerTest.java` — happy path + invalid input + 401 anonymous + 429 over rate limit (spec.md US4, FR-009)
+- [x] T023 [P] [US4] Controller test in `03-implementacao/backend/src/test/java/com/sifap/eligibility/interfaces/SimulateControllerTest.java` — happy path + invalid input + 401 anonymous + 429 over rate limit (spec.md US4, FR-009)
 
 ### Implementation for User Story 4
 
 - [x] T024 [US4] Implement `EligibilityController.simulate(...)` in the controller from T021 — maps request to the published port; returns `EligibilityResultDto` matching the OpenAPI schema
 - [x] T025 [US4] Implement `EligibilityService.simulate(...)` — pulls `EligibilityCriteria` via `ProgramCriteriaPort`, calls validator with `LocalDate.now()` as referenceDate (research R-001)
-- [ ] T026 [US4] Configure rate limiter (Bucket4j) on `/simulate` keyed by JWT `sub` (FR-009 — resolved Q3 in `/speckit.clarify`): **30 calls/min per authenticated user**, HTTP 429 + RFC 7807 body when exceeded. Audit policy is shared with FR-006: only `EligibleByBypass` outcomes emit the `RegionBypassEvaluated` event — no extra wiring needed since `DefaultEligibilityPortAdapter` (T012) already handles that.
+- [x] T026 [US4] Configure rate limiter (Bucket4j) on `/simulate` keyed by JWT `sub` (FR-009 — resolved Q3 in `/speckit.clarify`): **30 calls/min per authenticated user**, HTTP 429 + RFC 7807 body when exceeded. Audit policy is shared with FR-006: only `EligibleByBypass` outcomes emit the `RegionBypassEvaluated` event — no extra wiring needed since `DefaultEligibilityPortAdapter` (T012) already handles that.
 
 **Checkpoint**: All four user stories pass independently.
 
@@ -136,12 +136,12 @@ description: "Task list for feature 004 — Eligibility Validation"
 
 - [x] T027 [P] ArchUnit suite `EligibilityArchitectureTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/architecture/EligibilityArchitectureTest.java` — only `com.sifap.eligibility.api..` may be imported by other modules; `..domain..` must not import any persistence or Spring annotation (Constitution Principle II, plan.md §1)
 - [x] T028 Region-99 boot guard `Region99StartupGuard` (`@Profile("prod")`) in `03-implementacao/backend/src/main/java/com/sifap/eligibility/infrastructure/config/Region99StartupGuard.java` — `@PostConstruct` queries `beneficiary` for `region_code = 99` and fails boot when bypass disabled + count > 0 (spec.md FR-007, research R-007)
-- [ ] T029 Integration test `Region99StartupGuardTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/architecture/Region99StartupGuardTest.java` — `@SpringBootTest(properties = {"spring.profiles.active=prod","sifap.eligibility.region99Bypass.enabled=false"})` plus a seeded region-99 row → boot MUST fail
-- [ ] T030 [P] Observability — register Micrometer counters `sifap.eligibility.evaluated.count{result}`, `sifap.eligibility.region99.count{program}` in `03-implementacao/backend/src/main/java/com/sifap/eligibility/infrastructure/MetricsConfig.java`; assert presence via `/actuator/prometheus` smoke test (spec.md NFR-OBS-001)
+- [x] T029 Integration test `Region99StartupGuardTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/architecture/Region99StartupGuardTest.java` — `@SpringBootTest(properties = {"spring.profiles.active=prod","sifap.eligibility.region99Bypass.enabled=false"})` plus a seeded region-99 row → boot MUST fail
+- [x] T030 [P] Observability — register Micrometer counters `sifap.eligibility.evaluated.count{result}`, `sifap.eligibility.region99.count{program}` in `03-implementacao/backend/src/main/java/com/sifap/eligibility/infrastructure/MetricsConfig.java`; assert presence via `/actuator/prometheus` smoke test (spec.md NFR-OBS-001)
 - [x] T031 [P] Microbenchmark `EligibilityValidatorBench.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/performance/EligibilityValidatorBench.java` — 100 000 calls in ≤ 1 s on the workshop CI runner (spec.md NFR-PERF-001)
-- [ ] T032 Equivalence test `EligibilityEquivalenceTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/domain/EligibilityEquivalenceTest.java` — parameterized over `src/test/resources/fixtures/legacy-fixture-2026-05.csv` (shared with feature 001); asserts decision matches captured legacy output (Constitution Principle I)
+- [x] T032 Equivalence test `EligibilityEquivalenceTest.java` in `03-implementacao/backend/src/test/java/com/sifap/eligibility/domain/EligibilityEquivalenceTest.java` — parameterized over `src/test/resources/fixtures/legacy-fixture-2026-05.csv` (shared with feature 001); asserts decision matches captured legacy output (Constitution Principle I)
 - [ ] T033 [P] Quickstart validation — execute every curl in `specs/004-eligibility-validation/quickstart.md` end-to-end against the running app; record outputs in `quickstart-evidence.md` (not committed; PR comment only)
-- [ ] T034 [P] Documentation — glossary entries for `EligibilityResult`, `Reason`, `Region 99 Bypass` in `01-arqueologia/glossary.md` (cross-link MYS-008); short README at `specs/004-eligibility-validation/README.md` summarizing the feature for newcomers
+- [x] T034 [P] Documentation — glossary entries for `EligibilityResult`, `Reason`, `Region 99 Bypass` in `01-arqueologia/glossary.md` (cross-link MYS-008); short README at `specs/004-eligibility-validation/README.md` summarizing the feature for newcomers
 
 ---
 
